@@ -1,9 +1,5 @@
 package io.hellorin.boathub.dto;
 
-import io.hellorin.boathub.domain.BoatType;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 /**
