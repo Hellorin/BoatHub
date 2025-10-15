@@ -2,13 +2,14 @@ package io.hellorin.boathub;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
  * Main Spring Boot application class for BoatHub.
  * This class serves as the entry point for the application.
  */
-@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
+@SpringBootApplication
+@EnableJpaRepositories(basePackages = "io.hellorin.boathub.repository")
 public class BoatHubApplication {
 
     /**

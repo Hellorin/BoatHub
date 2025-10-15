@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  * Data Transfer Object for BoatEntity.
  * Used for API communication and data validation.
  */
-public class BoatEntityDto {
+public class BoatDto {
     
     private Long id;
     
@@ -31,7 +31,7 @@ public class BoatEntityDto {
     /**
      * Default constructor.
      */
-    public BoatEntityDto() {
+    public BoatDto() {
     }
     
     /**
@@ -43,8 +43,8 @@ public class BoatEntityDto {
      * @param createdDate The creation date
      * @param updatedDate The last update date
      */
-    public BoatEntityDto(Long id, String name, String description, BoatType boatType, 
-                        LocalDateTime createdDate, LocalDateTime updatedDate) {
+    public BoatDto(Long id, String name, String description, BoatType boatType,
+                   LocalDateTime createdDate, LocalDateTime updatedDate) {
         this.id = id;
         this.name = name;
         this.description = description;

@@ -38,6 +38,8 @@ public class BoatEntity {
     
     /**
      * To classify them, a boat's type is interesting.
+     * We do a strong assumption here: the attributes of a boat a general and not related to its
+     * type. We would have use inheritance in the other case
      */
     @NotNull(message = "Boat type is required")
     @Enumerated(EnumType.STRING)
