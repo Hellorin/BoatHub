@@ -1,6 +1,8 @@
 package io.hellorin.boathub.controller;
 
 import io.hellorin.boathub.dto.BoatDto;
+import io.hellorin.boathub.dto.BoatTypeUpdateDto;
+import io.hellorin.boathub.domain.BoatType;
 import io.hellorin.boathub.service.BoatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,5 +67,44 @@ class BoatV1ControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
         verify(boatService).getBoatById(boatId);
+    }
+
+    @Test
+    void updateBoatType_WithValidBoatType_ShouldReturnUpdatedBoat() {
+        // Given
+        Long boatId = 1L;
+        BoatTypeUpdateDto typeUpdateDto = new BoatTypeUpdateDto("MOTORBOAT");
+        BoatDto updatedBoat = new BoatDto();
+        updatedBoat.setId(1L);
+        updatedBoat.setName("Test Boat");
+        updatedBoat.setDescription("A test boat");
+        updatedBoat.setBoatType(BoatType.MOTORBOAT);
+        
+        when(boatService.updateBoatType(boatId, typeUpdateDto)).thenReturn(Optional.of(updatedBoat));
+
+        // When
+        ResponseEntity<BoatDto> response = boatV1Controller.updateBoatType(boatId, typeUpdateDto);
+
+        // Then
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(BoatType.MOTORBOAT, response.getBody().getBoatType());
+        verify(boatService).updateBoatType(boatId, typeUpdateDto);
+    }
+
+    @Test
+    void updateBoatType_WithNullBoatType_ShouldCallService() {
+        // Given
+        Long boatId = 1L;
+        BoatTypeUpdateDto typeUpdateDto = new BoatTypeUpdateDto();
+        when(boatService.updateBoatType(boatId, typeUpdateDto)).thenReturn(Optional.empty());
+
+        // When
+        ResponseEntity<BoatDto> response = boatV1Controller.updateBoatType(boatId, typeUpdateDto);
+
+        // Then
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
+        verify(boatService).updateBoatType(boatId, typeUpdateDto);
     }
 }

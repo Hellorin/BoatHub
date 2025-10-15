@@ -1,7 +1,5 @@
 package io.hellorin.boathub.dto;
 
-import io.hellorin.boathub.domain.BoatType;
-
 /**
  * Data Transfer Object for boat creation requests.
  * Contains only the fields that users can provide when creating a new boat.
@@ -21,7 +19,7 @@ public class BoatCreationDto extends BaseBoatDto {
      * @param description The boat description
      * @param boatType The boat type
      */
-    public BoatCreationDto(String name, String description, BoatType boatType) {
+    public BoatCreationDto(String name, String description, String boatType) {
         super(name, description, boatType);
     }
 }

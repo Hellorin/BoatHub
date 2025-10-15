@@ -1,6 +1,7 @@
 package io.hellorin.boathub.dto;
 
 import io.hellorin.boathub.domain.BoatType;
+import io.hellorin.boathub.validation.ValidBoatType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -19,12 +20,13 @@ public abstract class BaseBoatDto {
     private String description;
     
     @NotNull(message = "Boat type is required")
-    private BoatType boatType;
+    @ValidBoatType
+    private String boatType;
     
     /**
      * Default constructor.
      */
-    public BaseBoatDto() {
+    protected BaseBoatDto() {
     }
     
     /**
@@ -33,7 +35,7 @@ public abstract class BaseBoatDto {
      * @param description The boat description
      * @param boatType The boat type
      */
-    public BaseBoatDto(String name, String description, BoatType boatType) {
+    protected BaseBoatDto(String name, String description, String boatType) {
         this.name = name;
         this.description = description;
         this.boatType = boatType;
@@ -55,11 +57,11 @@ public abstract class BaseBoatDto {
         this.description = description;
     }
     
-    public BoatType getBoatType() {
+    public String getBoatType() {
         return boatType;
     }
     
-    public void setBoatType(BoatType boatType) {
+    public void setBoatType(String boatType) {
         this.boatType = boatType;
     }
 }

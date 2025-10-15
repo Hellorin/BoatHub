@@ -1,28 +1,26 @@
 package io.hellorin.boathub.controller;
 
-import io.hellorin.boathub.dto.BoatCreationDto;
-import io.hellorin.boathub.dto.BoatDto;
-import io.hellorin.boathub.dto.BoatUpdateDto;
+import io.hellorin.boathub.dto.*;
 import io.hellorin.boathub.service.BoatService;
+import io.hellorin.boathub.validation.ValidSortDirection;
+import io.hellorin.boathub.validation.ValidSortField;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.util.List;
+import java.util.Optional;
 
 /**
  * REST controller for boat-related API endpoints.
@@ -31,8 +29,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/boats")
 @Tag(name = "Boats", description = "API for managing boats")
+@Validated
 public class BoatV1Controller {
-
     private final BoatService boatService;
 
     public BoatV1Controller(BoatService boatService) {
@@ -40,18 +38,44 @@ public class BoatV1Controller {
     }
 
     /**
-     * Retrieves all boats in the system.
-     * @return List of all boats
+     * Retrieves all boats in the system with pagination support.
+     * @return Page of boats
      */
     @Operation(
-        summary = "Get all boats",
-        description = "Retrieves a list of all boats in the system"
+        summary = "Get all boats in page",
+        description = "Retrieves a paginated list of all boats in the system. Supports pagination parameters: page (0-based), size, sortBy (id, name, description, boatType), and sortDirection (asc, desc)."
     )
-    @ApiResponse(responseCode = "200", description = "List of boats retrieved successfully")
+    @ApiResponse(responseCode = "200", description = "Page of boats retrieved successfully")
     @GetMapping(produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
-    public List<BoatDto> getAllBoats() {
-        return boatService.getAllBoats();
+    public Page<BoatDto> getAllBoatsInPage(
+            @Parameter(description = "Page requested", example = "0")
+            @Min(0) @RequestParam("page") int page,
+            @Parameter(description = "Page size requested", example = "10")
+            @Min(1) @Max(50) @RequestParam(value = "size", defaultValue = "10") int size,
+            @Parameter(description = "Field to sort by", example = "name")
+            @ValidSortField @RequestParam(name = "sortBy", defaultValue = "name", required = false) String sortBy,
+            @Parameter(description = "Sort direction", example = "asc")
+            @ValidSortDirection @RequestParam(name = "sortDirection", defaultValue = "asc", required = false) String sortDirection) {
+        
+        // Create sort direction
+        Sort.Direction direction = parseSortDirection(sortDirection);
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        return boatService.getAllBoatsInPage(pageRequest);
+    }
+    
+    /**
+     * Parses the sort direction string into a Sort.Direction enum.
+     * @param sortDirection The direction string (asc or desc)
+     * @return Sort.Direction.ASC for "asc", Sort.Direction.DESC for "desc"
+     */
+    private Sort.Direction parseSortDirection(String sortDirection) {
+        if (sortDirection == null || sortDirection.equalsIgnoreCase("asc")) {
+            return Sort.Direction.ASC;
+        } else {
+            return Sort.Direction.DESC;
+        }
     }
 
     /**
@@ -71,7 +95,7 @@ public class BoatV1Controller {
     public ResponseEntity<BoatDto> getBoatById(
             @Parameter(description = "Unique identifier of the boat", example = "1")
             @PathVariable("id") Long id) {
-        var boat = boatService.getBoatById(id);
+        Optional<BoatDto> boat = boatService.getBoatById(id);
         
         return boat.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -96,31 +120,89 @@ public class BoatV1Controller {
             @Parameter(description = "Boat data to create")
             @Valid @RequestBody BoatCreationDto boatCreationDto) {
         var createdBoat = boatService.createBoat(boatCreationDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdBoat);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .location(java.net.URI.create("/api/v1/boats/" + createdBoat.getId()))
+                .body(createdBoat);
     }
 
+
     /**
-     * Updates an existing boat by its ID.
+     * Updates the name of an existing boat by its ID.
      * @param id The ID of the boat to update
-     * @param boatUpdateDto The updated boat data
+     * @param boatNameUpdateDto The new boat name
      * @return ResponseEntity containing the updated boat DTO if found, or 404 if not found
      */
     @Operation(
-        summary = "Update a boat",
-        description = "Updates an existing boat with the provided information"
+        summary = "Update boat name",
+        description = "Updates the name of an existing boat"
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Boat updated successfully"),
-        @ApiResponse(responseCode = "400", description = "Invalid boat data provided"),
+        @ApiResponse(responseCode = "200", description = "Boat name updated successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid boat name provided"),
         @ApiResponse(responseCode = "404", description = "Boat not found")
     })
-    @PutMapping(value = "/{id}", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<BoatDto> updateBoat(
+    @PatchMapping(value = "/{id}/name", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<BoatDto> updateBoatName(
             @Parameter(description = "Unique identifier of the boat to update", example = "1")
             @PathVariable("id") Long id,
-            @Parameter(description = "Updated boat data")
-            @Valid @RequestBody BoatUpdateDto boatUpdateDto) {
-        var updatedBoat = boatService.updateBoat(id, boatUpdateDto);
+            @Parameter(description = "New boat name")
+            @Valid @RequestBody BoatNameUpdateDto boatNameUpdateDto) {
+        Optional<BoatDto> updatedBoat = boatService.updateBoatName(id, boatNameUpdateDto);
+        
+        return updatedBoat.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Updates the description of an existing boat by its ID.
+     * @param id The ID of the boat to update
+     * @param boatDescriptionUpdateDto The new boat description
+     * @return ResponseEntity containing the updated boat DTO if found, or 404 if not found
+     */
+    @Operation(
+        summary = "Update boat description",
+        description = "Updates the description of an existing boat"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Boat description updated successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid boat description provided"),
+        @ApiResponse(responseCode = "404", description = "Boat not found")
+    })
+    @PatchMapping(value = "/{id}/description", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<BoatDto> updateBoatDescription(
+            @Parameter(description = "Unique identifier of the boat to update", example = "1")
+            @PathVariable("id") Long id,
+            @Parameter(description = "New boat description")
+            @Valid @RequestBody BoatDescriptionUpdateDto boatDescriptionUpdateDto) {
+        Optional<BoatDto> updatedBoat = boatService.updateBoatDescription(id, boatDescriptionUpdateDto);
+        
+        return updatedBoat.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Updates the type of an existing boat by its ID.
+     * @param id The ID of the boat to update
+     * @param boatTypeUpdateDto The new boat type
+     * @return ResponseEntity containing the updated boat DTO if found, or 404 if not found
+     */
+    @Operation(
+        summary = "Update boat type",
+        description = "Updates the type of an existing boat"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Boat type updated successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid boat type provided"),
+        @ApiResponse(responseCode = "404", description = "Boat not found")
+    })
+    @PatchMapping(value = "/{id}/type", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<BoatDto> updateBoatType(
+            @Parameter(description = "Unique identifier of the boat to update", example = "1")
+            @PathVariable("id") Long id,
+            @Parameter(description = "New boat type")
+            @Valid @RequestBody BoatTypeUpdateDto boatTypeUpdateDto) {
+        var updatedBoat = boatService.updateBoatType(id, boatTypeUpdateDto);
         
         return updatedBoat.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

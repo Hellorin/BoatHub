@@ -2,13 +2,18 @@ package io.hellorin.boathub.service;
 
 import io.hellorin.boathub.repository.BoatRepository;
 import io.hellorin.boathub.mapper.BoatMapper;
+import io.hellorin.boathub.domain.BoatEntity;
+import io.hellorin.boathub.domain.BoatType;
 import io.hellorin.boathub.dto.BoatCreationDto;
 import io.hellorin.boathub.dto.BoatDto;
-import io.hellorin.boathub.dto.BoatUpdateDto;
+import io.hellorin.boathub.dto.BoatNameUpdateDto;
+import io.hellorin.boathub.dto.BoatDescriptionUpdateDto;
+import io.hellorin.boathub.dto.BoatTypeUpdateDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -28,13 +33,13 @@ public class BoatService {
     }
 
     /**
-     * Retrieves all boats from the system.
-     * @return List of all boats as DTOs
+     * Retrieves all boats from the system with pagination.
+     * @param pageable The pagination information
+     * @return Page of all boats as DTOs
      */
-    public List<BoatDto> getAllBoats() {
-        return boatRepository.findAll().stream()
-                .map(boatMapper::toDto)
-                .toList();
+    public Page<BoatDto> getAllBoatsInPage(Pageable pageable) {
+        return boatRepository.findAll(pageable)
+                .map(boatMapper::toDto);
     }
 
     /**
@@ -53,29 +58,64 @@ public class BoatService {
      * @return The created boat DTO with generated ID and timestamps
      */
     public BoatDto createBoat(BoatCreationDto boatCreationDto) {
-        var boatEntity = boatMapper.toEntity(boatCreationDto);
+        BoatEntity boatEntity = boatMapper.toEntity(boatCreationDto);
         boatEntity.setCreatedDate(LocalDateTime.now());
         boatEntity.setUpdatedDate(LocalDateTime.now());
         
-        var savedEntity = boatRepository.save(boatEntity);
+        BoatEntity savedEntity = boatRepository.save(boatEntity);
         return boatMapper.toDto(savedEntity);
     }
 
+
     /**
-     * Updates an existing boat by its ID.
+     * Updates the name of an existing boat by its ID.
      * @param id The ID of the boat to update
-     * @param boatUpdateDto The updated boat data
+     * @param boatNameUpdateDto The new boat name
      * @return Optional containing the updated boat DTO if found, empty otherwise
      */
-    public Optional<BoatDto> updateBoat(Long id, BoatUpdateDto boatUpdateDto) {
+    public Optional<BoatDto> updateBoatName(Long id, BoatNameUpdateDto boatNameUpdateDto) {
         return boatRepository.findById(id)
                 .map(existingBoat -> {
-                    existingBoat.setName(boatUpdateDto.getName());
-                    existingBoat.setDescription(boatUpdateDto.getDescription());
-                    existingBoat.setBoatType(boatUpdateDto.getBoatType());
+                    existingBoat.setName(boatNameUpdateDto.getName());
                     existingBoat.setUpdatedDate(LocalDateTime.now());
                     
-                    var savedEntity = boatRepository.save(existingBoat);
+                    BoatEntity savedEntity = boatRepository.save(existingBoat);
+                    return boatMapper.toDto(savedEntity);
+                });
+    }
+
+    /**
+     * Updates the description of an existing boat by its ID.
+     * @param id The ID of the boat to update
+     * @param boatDescriptionUpdateDto The new boat description
+     * @return Optional containing the updated boat DTO if found, empty otherwise
+     */
+    public Optional<BoatDto> updateBoatDescription(Long id, BoatDescriptionUpdateDto boatDescriptionUpdateDto) {
+        return boatRepository.findById(id)
+                .map(existingBoat -> {
+                    existingBoat.setDescription(boatDescriptionUpdateDto.getDescription());
+                    existingBoat.setUpdatedDate(LocalDateTime.now());
+                    
+                    BoatEntity savedEntity = boatRepository.save(existingBoat);
+                    return boatMapper.toDto(savedEntity);
+                });
+    }
+
+    /**
+     * Updates the type of an existing boat by its ID.
+     * @param id The ID of the boat to update
+     * @param boatTypeUpdateDto The new boat type
+     * @return Optional containing the updated boat DTO if found, empty otherwise
+     */
+    public Optional<BoatDto> updateBoatType(Long id, BoatTypeUpdateDto boatTypeUpdateDto) {
+        return boatRepository.findById(id)
+                .map(existingBoat -> {
+                    // Convert String to BoatType enum
+                    BoatType boatType = BoatType.valueOf(boatTypeUpdateDto.getBoatType().toUpperCase());
+                    existingBoat.setBoatType(boatType);
+                    existingBoat.setUpdatedDate(LocalDateTime.now());
+                    
+                    BoatEntity savedEntity = boatRepository.save(existingBoat);
                     return boatMapper.toDto(savedEntity);
                 });
     }

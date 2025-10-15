@@ -27,13 +27,14 @@ public class BoatEntity {
      */
     @NotBlank(message = "Boat name is required")
     @Size(max = 100, message = "Boat name must not exceed 100 characters")
-    @Column(unique = true, nullable = false)
+    @Column(name = "name", unique = true, nullable = false)
     private String name;
     
     /**
      * 
      */
     @Size(max = 500, message = "Description must not exceed 500 characters")
+    @Column(name = "description")
     private String description;
     
     /**
@@ -43,7 +44,7 @@ public class BoatEntity {
      */
     @NotNull(message = "Boat type is required")
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "boat_type", nullable = false)
     private BoatType boatType;
     
     /**

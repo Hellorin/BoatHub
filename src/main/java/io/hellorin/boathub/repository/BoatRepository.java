@@ -4,7 +4,8 @@ import io.hellorin.boathub.domain.BoatEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 
 /**
  * Repository interface for BoatEntity operations.
@@ -14,8 +15,9 @@ import java.util.List;
 public interface BoatRepository extends JpaRepository<BoatEntity, Long> {
     
     /**
-     * Finds all boats in the system.
-     * @return List of all boats
+     * Finds all boats in the system with pagination.
+     * @param pageable The pagination information
+     * @return Page of all boats
      */
-    List<BoatEntity> findAll();
+    Page<BoatEntity> findAll(Pageable pageable);
 }
