@@ -100,8 +100,7 @@ class ValidBoatTypeValidatorTest {
         Set<ConstraintViolation<TestBoatTypeDto>> violations = validator.validate(dto);
 
         // Then
-        assertThat(violations).as(expectedMessage).isNotEmpty();
-        assertThat(violations).hasSize(1);
+        assertThat(violations).as(expectedMessage).isNotEmpty().hasSize(1);
         assertThat(violations.iterator().next().getMessage()).contains("Invalid boat type");
     }
 

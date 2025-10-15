@@ -6,6 +6,8 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Set;
 
@@ -25,56 +27,43 @@ class ValidSortFieldValidatorTest {
         validator = factory.getValidator();
     }
 
-    @Test
-    void isValid_WithValidSortField_ShouldReturnTrue() {
+    @ParameterizedTest
+    @ValueSource(strings = {"id", "name", "description", "boatType"})
+    void isValid_WithValidSortFields_ShouldReturnTrue(String sortField) {
         // Given
-        TestSortFieldDto dto = new TestSortFieldDto("id");
+        TestSortFieldDto dto = new TestSortFieldDto(sortField);
 
         // When
         Set<ConstraintViolation<TestSortFieldDto>> violations = validator.validate(dto);
 
         // Then
-        assertThat(violations).as("Valid sort field should not produce violations").isEmpty();
+        assertThat(violations).as("Sort field '%s' should be valid", sortField).isEmpty();
     }
 
-    @Test
-    void isValid_WithAllValidSortFields_ShouldReturnTrue() {
-        // Given & When & Then
-        String[] validFields = {"id", "name", "description", "boatType"};
-        
-        for (String field : validFields) {
-            TestSortFieldDto dto = new TestSortFieldDto(field);
-            Set<ConstraintViolation<TestSortFieldDto>> violations = validator.validate(dto);
-            assertThat(violations)
-                .as("Sort field '%s' should be valid but validation failed", field).isEmpty();
-        }
-    }
-
-    @Test
-    void isValid_WithInvalidSortField_ShouldReturnFalse() {
+    @ParameterizedTest
+    @ValueSource(strings = {"invalidField", "createdAt", "updatedAt", "price", "ID", "NAME", "   "})
+    void isValid_WithInvalidSortFields_ShouldReturnFalse(String sortField) {
         // Given
-        TestSortFieldDto dto = new TestSortFieldDto("invalidField");
+        TestSortFieldDto dto = new TestSortFieldDto(sortField);
 
         // When
         Set<ConstraintViolation<TestSortFieldDto>> violations = validator.validate(dto);
 
         // Then
-        assertThat(violations).as("Invalid sort field should produce violations").isNotEmpty();
-        assertThat(violations).hasSize(1);
+        assertThat(violations).as("Sort field '%s' should be invalid", sortField).isNotEmpty().hasSize(1);
         assertThat(violations.iterator().next().getMessage()).contains("Invalid sortBy field");
     }
 
     @Test
-    void isValid_WithAnotherInvalidSortField_ShouldReturnFalse() {
+    void isValid_WithEmptySortField_ShouldReturnFalse() {
         // Given
-        TestSortFieldDto dto = new TestSortFieldDto("createdAt");
+        TestSortFieldDto dto = new TestSortFieldDto("");
 
         // When
         Set<ConstraintViolation<TestSortFieldDto>> violations = validator.validate(dto);
 
         // Then
-        assertThat(violations).as("Invalid sort field should produce violations").isNotEmpty();
-        assertThat(violations).hasSize(1);
+        assertThat(violations).as("Empty sort field should be invalid").isNotEmpty().hasSize(1);
         assertThat(violations.iterator().next().getMessage()).contains("Invalid sortBy field");
     }
 
@@ -87,78 +76,9 @@ class ValidSortFieldValidatorTest {
         Set<ConstraintViolation<TestSortFieldDto>> violations = validator.validate(dto);
 
         // Then
-        assertThat(violations).as("Null values should be handled by @NotNull, not @ValidSortField").isEmpty();
+        assertThat(violations).as("Null sort field should be valid (handled by @NotNull)").isEmpty();
     }
 
-    @Test
-    void isValid_WithEmptyStringSortField_ShouldReturnFalse() {
-        // Given
-        TestSortFieldDto dto = new TestSortFieldDto("");
-
-        // When
-        Set<ConstraintViolation<TestSortFieldDto>> violations = validator.validate(dto);
-
-        // Then
-        assertThat(violations).as("Empty string should be invalid").isNotEmpty();
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).contains("Invalid sortBy field");
-    }
-
-    @Test
-    void isValid_WithWhitespaceOnlySortField_ShouldReturnFalse() {
-        // Given
-        TestSortFieldDto dto = new TestSortFieldDto("   ");
-
-        // When
-        Set<ConstraintViolation<TestSortFieldDto>> violations = validator.validate(dto);
-
-        // Then
-        assertThat(violations).as("Whitespace-only string should be invalid").isNotEmpty();
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).contains("Invalid sortBy field");
-    }
-
-    @Test
-    void isValid_WithCaseSensitiveInvalidField_ShouldReturnFalse() {
-        // Given
-        TestSortFieldDto dto = new TestSortFieldDto("ID"); // uppercase
-
-        // When
-        Set<ConstraintViolation<TestSortFieldDto>> violations = validator.validate(dto);
-
-        // Then
-        assertThat(violations).as("Case-sensitive validation should reject uppercase field").isNotEmpty();
-        assertThat(violations).hasSize(1);
-        assertThat(violations.iterator().next().getMessage()).contains("Invalid sortBy field");
-    }
-
-    @Test
-    void isValid_WithValidSortFieldValues_ShouldReturnTrue() {
-        // Given - Test the validator directly with all valid field values
-        ValidSortFieldValidator validatorImpl = new ValidSortFieldValidator();
-        validatorImpl.initialize(null);
-
-        // When & Then - Test all valid sort fields
-        String[] validFields = {"id", "name", "description", "boatType"};
-        for (String field : validFields) {
-            boolean isValid = validatorImpl.isValid(field, null);
-            assertThat(isValid).as("Sort field '%s' should be valid", field).isTrue();
-        }
-    }
-
-    @Test
-    void isValid_WithInvalidSortFieldValues_ShouldReturnFalse() {
-        // Given - Test the validator directly with invalid field values
-        ValidSortFieldValidator validatorImpl = new ValidSortFieldValidator();
-        validatorImpl.initialize(null);
-
-        // When & Then - Test invalid sort fields
-        String[] invalidFields = {"", "invalid", "ID", "createdAt", "updatedAt", "price"};
-        for (String field : invalidFields) {
-            boolean isValid = validatorImpl.isValid(field, null);
-            assertThat(isValid).as("Sort field '%s' should be invalid", field).isFalse();
-        }
-    }
 
     /**
      * Test DTO class to test the ValidSortField annotation.

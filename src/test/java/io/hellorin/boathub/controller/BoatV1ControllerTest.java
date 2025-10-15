@@ -16,8 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -122,7 +121,7 @@ class BoatV1ControllerTest {
         String sortBy = "name";
         String sortDirection = "asc";
         
-        List<BoatDto> boats = Arrays.asList(testBoat);
+        List<BoatDto> boats = Collections.singletonList(testBoat);
         Page<BoatDto> boatPage = new PageImpl<>(boats);
         PageRequest expectedPageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sortBy));
         
@@ -134,7 +133,7 @@ class BoatV1ControllerTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).getId()).isEqualTo(testBoat.getId());
+        assertThat(result.getContent().getFirst().getId()).isEqualTo(testBoat.getId());
         verify(boatService).getAllBoatsInPage(expectedPageRequest);
     }
 
@@ -146,7 +145,7 @@ class BoatV1ControllerTest {
         String sortBy = "id";
         String sortDirection = "desc";
         
-        List<BoatDto> boats = Arrays.asList(testBoat);
+        List<BoatDto> boats = Collections.singletonList(testBoat);
         Page<BoatDto> boatPage = new PageImpl<>(boats);
         PageRequest expectedPageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortBy));
         
@@ -168,7 +167,7 @@ class BoatV1ControllerTest {
         String sortBy = "name";
         String sortDirection = null;
         
-        List<BoatDto> boats = Arrays.asList(testBoat);
+        List<BoatDto> boats = Collections.singletonList(testBoat);
         Page<BoatDto> boatPage = new PageImpl<>(boats);
         PageRequest expectedPageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sortBy));
         
@@ -337,14 +336,13 @@ class BoatV1ControllerTest {
         int size = 10;
         String sortBy = "name";
         String sortDirection = "asc";
-        Page<BoatDto> expectedPage = new PageImpl<>(Arrays.asList(testBoat));
+        Page<BoatDto> expectedPage = new PageImpl<>(Collections.singletonList(testBoat));
         when(boatService.getAllBoatsInPage(any(PageRequest.class))).thenReturn(expectedPage);
 
         // When
         Page<BoatDto> result = boatV1Controller.getAllBoatsInPage(page, size, sortBy, sortDirection);
 
         // Then
-        assertThat(result);
         assertThat(result.getContent()).hasSize(1);
         verify(boatService).getAllBoatsInPage(any(PageRequest.class));
     }
@@ -353,13 +351,13 @@ class BoatV1ControllerTest {
     void getAllBoatsInPage_WithAllValidSortFields_ShouldCallService() {
         // Given
         String[] validSortFields = {"id", "name", "description", "boatType"};
-        Page<BoatDto> expectedPage = new PageImpl<>(Arrays.asList(testBoat));
+        Page<BoatDto> expectedPage = new PageImpl<>(Collections.singletonList(testBoat));
         when(boatService.getAllBoatsInPage(any(PageRequest.class))).thenReturn(expectedPage);
 
         // When & Then
         for (String sortField : validSortFields) {
             Page<BoatDto> result = boatV1Controller.getAllBoatsInPage(0, 10, sortField, "asc");
-            assertThat(result);
+            assertThat(result).isEqualTo(expectedPage);
         }
         
         // Verify the service was called the expected number of times
@@ -370,13 +368,13 @@ class BoatV1ControllerTest {
     void getAllBoatsInPage_WithAllValidSortDirections_ShouldCallService() {
         // Given
         String[] validSortDirections = {"asc", "desc", "ASC", "DESC"};
-        Page<BoatDto> expectedPage = new PageImpl<>(Arrays.asList(testBoat));
+        Page<BoatDto> expectedPage = new PageImpl<>(Collections.singletonList(testBoat));
         when(boatService.getAllBoatsInPage(any(PageRequest.class))).thenReturn(expectedPage);
 
         // When & Then
         for (String sortDirection : validSortDirections) {
             Page<BoatDto> result = boatV1Controller.getAllBoatsInPage(0, 10, "name", sortDirection);
-            assertThat(result);
+            assertThat(result).isEqualTo(expectedPage);
         }
         
         // Verify the service was called the expected number of times
@@ -498,54 +496,5 @@ class BoatV1ControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         verify(boatService).updateBoatType(boatId, typeDto);
-    }
-
-    // Test that the controller properly handles validation annotations
-    // Note: These tests verify that the controller method signatures are correct
-    // and that validation annotations are properly applied. The actual validation
-    // behavior is tested in the validation unit tests.
-
-    @Test
-    void getAllBoatsInPage_MethodSignature_ShouldHaveValidationAnnotations() throws NoSuchMethodException {
-        // Given
-        Method method = BoatV1Controller.class.getMethod("getAllBoatsInPage", 
-            int.class, int.class, String.class, String.class);
-
-        // Then
-        assertThat(method.getAnnotation(org.springframework.web.bind.annotation.GetMapping.class));
-        assertThat(method.getParameterAnnotations()[0]); // @Min(0) for page
-        assertThat(method.getParameterAnnotations()[1]); // @Min(1) @Max(50) for size
-        assertThat(method.getParameterAnnotations()[2]); // @ValidSortField for sortBy
-        assertThat(method.getParameterAnnotations()[3]); // @ValidSortDirection for sortDirection
-    }
-
-    @Test
-    void createBoat_MethodSignature_ShouldHaveValidationAnnotations() throws NoSuchMethodException {
-        // Given
-        Method method = BoatV1Controller.class.getMethod("createBoat", BoatCreationDto.class);
-
-        // Then
-        assertThat(method.getAnnotation(org.springframework.web.bind.annotation.PostMapping.class));
-        assertThat(method.getParameterAnnotations()[0]); // @Valid for boatDto
-    }
-
-    @Test
-    void updateBoatName_MethodSignature_ShouldHaveValidationAnnotations() throws NoSuchMethodException {
-        // Given
-        Method method = BoatV1Controller.class.getMethod("updateBoatName", Long.class, BoatNameUpdateDto.class);
-
-        // Then
-        assertThat(method.getAnnotation(org.springframework.web.bind.annotation.PatchMapping.class));
-        assertThat(method.getParameterAnnotations()[1]); // @Valid for nameDto
-    }
-
-    @Test
-    void updateBoatType_MethodSignature_ShouldHaveValidationAnnotations() throws NoSuchMethodException {
-        // Given
-        Method method = BoatV1Controller.class.getMethod("updateBoatType", Long.class, BoatTypeUpdateDto.class);
-
-        // Then
-        assertThat(method.getAnnotation(org.springframework.web.bind.annotation.PatchMapping.class));
-        assertThat(method.getParameterAnnotations()[1]); // @Valid for typeDto
     }
 }

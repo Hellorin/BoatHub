@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 /**
@@ -124,7 +125,7 @@ class BoatServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getContent().isEmpty());
+        assertThat(result.getContent()).isEmpty();
         
         verify(boatRepository).findAll(pageable);
         verify(boatMapper, never()).toDto(any());
@@ -137,7 +138,7 @@ class BoatServiceTest {
         when(boatRepository.findAll(pageable)).thenThrow(new RuntimeException("Database error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.getAllBoatsInPage(pageable));
+        assertThrows(RuntimeException.class, () -> boatService.getAllBoatsInPage(pageable));
         
         verify(boatRepository).findAll(pageable);
         verify(boatMapper, never()).toDto(any());
@@ -154,8 +155,7 @@ class BoatServiceTest {
         Optional<BoatDto> result = boatService.getBoatById(boatId);
 
         // Then
-        assertThat(result).isPresent();
-        assertThat(result.get()).isEqualTo(testBoatDto);
+        assertThat(result).isPresent().contains(testBoatDto);
         
         verify(boatRepository).findById(boatId);
         verify(boatMapper).toDto(testBoatEntity);
@@ -199,7 +199,7 @@ class BoatServiceTest {
         when(boatRepository.findById(boatId)).thenThrow(new RuntimeException("Database error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.getBoatById(boatId));
+        assertThrows(RuntimeException.class, () -> boatService.getBoatById(boatId));
         
         verify(boatRepository).findById(boatId);
         verify(boatMapper, never()).toDto(any());
@@ -213,7 +213,7 @@ class BoatServiceTest {
         when(boatMapper.toDto(testBoatEntity)).thenThrow(new RuntimeException("Mapping error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.getBoatById(boatId));
+        assertThrows(RuntimeException.class, () -> boatService.getBoatById(boatId));
         
         verify(boatRepository).findById(boatId);
         verify(boatMapper).toDto(testBoatEntity);
@@ -233,7 +233,6 @@ class BoatServiceTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0));
         
         verify(boatRepository).findAll(pageable);
         verify(boatMapper).toDto(testBoatEntity);
@@ -266,8 +265,7 @@ class BoatServiceTest {
         Optional<BoatDto> result = boatService.getBoatById(boatId);
 
         // Then
-        assertThat(result).isPresent();
-        assertThat(result.get()).isEqualTo(fishingBoatDto);
+        assertThat(result).isPresent().contains(fishingBoatDto);
         assertThat(result.get().getBoatType()).isEqualTo(BoatType.FISHING_BOAT);
         
         verify(boatRepository).findById(boatId);
@@ -314,8 +312,7 @@ class BoatServiceTest {
         List<BoatType> boatTypes = result.getContent().stream()
                 .map(BoatDto::getBoatType)
                 .toList();
-        assertThat(boatTypes).contains(BoatType.SAILBOAT);
-        assertThat(boatTypes).contains(BoatType.YACHT);
+        assertThat(boatTypes).contains(BoatType.SAILBOAT).contains(BoatType.YACHT);
         
         verify(boatRepository).findAll(pageable);
         verify(boatMapper).toDto(testBoatEntity);
@@ -353,8 +350,7 @@ class BoatServiceTest {
         Optional<BoatDto> result = boatService.updateBoatName(boatId, nameUpdateDto);
 
         // Then
-        assertThat(result).isPresent();
-        assertThat(result.get()).isEqualTo(updatedDto);
+        assertThat(result).isPresent().contains(updatedDto);
         assertThat(result.get().getName()).isEqualTo(newName);
         
         verify(boatRepository).findById(boatId);
@@ -411,8 +407,7 @@ class BoatServiceTest {
         Optional<BoatDto> result = boatService.updateBoatDescription(boatId, descriptionUpdateDto);
 
         // Then
-        assertThat(result).isPresent();
-        assertThat(result.get()).isEqualTo(updatedDto);
+        assertThat(result).isPresent().contains(updatedDto);
         assertThat(result.get().getDescription()).isEqualTo(newDescription);
         
         verify(boatRepository).findById(boatId);
@@ -469,8 +464,7 @@ class BoatServiceTest {
         Optional<BoatDto> result = boatService.updateBoatType(boatId, typeUpdateDto);
 
         // Then
-        assertThat(result).isPresent();
-        assertThat(result.get()).isEqualTo(updatedDto);
+        assertThat(result).contains(updatedDto);
         assertThat(result.get().getBoatType()).isEqualTo(newType);
         
         verify(boatRepository).findById(boatId);
@@ -504,7 +498,7 @@ class BoatServiceTest {
         when(boatRepository.findById(boatId)).thenThrow(new RuntimeException("Database error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatName(boatId, nameUpdateDto));
+        assertThrows(RuntimeException.class, () -> boatService.updateBoatName(boatId, nameUpdateDto));
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository, never()).save(any());
@@ -519,7 +513,7 @@ class BoatServiceTest {
         when(boatRepository.findById(boatId)).thenThrow(new RuntimeException("Database error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatDescription(boatId, descriptionUpdateDto));
+        assertThrows(RuntimeException.class, () -> boatService.updateBoatDescription(boatId, descriptionUpdateDto));
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository, never()).save(any());
@@ -534,7 +528,7 @@ class BoatServiceTest {
         when(boatRepository.findById(boatId)).thenThrow(new RuntimeException("Database error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatType(boatId, typeUpdateDto));
+        assertThrows(RuntimeException.class, () -> boatService.updateBoatType(boatId, typeUpdateDto));
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository, never()).save(any());
@@ -577,8 +571,7 @@ class BoatServiceTest {
         BoatDto result = boatService.createBoat(creationDto);
 
         // Then
-        assertThat(result).isNotNull();
-        assertThat(result).isEqualTo(expectedDto);
+        assertThat(result).isNotNull().isEqualTo(expectedDto);
         assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getName()).isEqualTo("New Boat");
         assertThat(result.getDescription()).isEqualTo("A new test boat");
@@ -641,7 +634,7 @@ class BoatServiceTest {
         when(boatMapper.toEntity(creationDto)).thenThrow(new RuntimeException("Mapping error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.createBoat(creationDto));
+        assertThrows(RuntimeException.class, () -> boatService.createBoat(creationDto));
         
         verify(boatMapper).toEntity(creationDto);
         verify(boatRepository, never()).save(any());
@@ -661,7 +654,7 @@ class BoatServiceTest {
         when(boatRepository.save(any(BoatEntity.class))).thenThrow(new RuntimeException("Database error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.createBoat(creationDto));
+        assertThrows(RuntimeException.class, () -> boatService.createBoat(creationDto));
         
         verify(boatMapper).toEntity(creationDto);
         verify(boatRepository).save(any(BoatEntity.class));
@@ -688,7 +681,7 @@ class BoatServiceTest {
         when(boatMapper.toDto(savedEntity)).thenThrow(new RuntimeException("DTO mapping error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.createBoat(creationDto));
+        assertThrows(RuntimeException.class, () -> boatService.createBoat(creationDto));
         
         verify(boatMapper).toEntity(creationDto);
         verify(boatRepository).save(any(BoatEntity.class));
@@ -705,7 +698,7 @@ class BoatServiceTest {
         boolean result = boatService.deleteBoat(boatId);
 
         // Then
-        assertThat(result).isNotNull();
+        assertThat(result).isTrue();
         
         verify(boatRepository).existsById(boatId);
         verify(boatRepository).deleteById(boatId);
@@ -721,7 +714,7 @@ class BoatServiceTest {
         boolean result = boatService.deleteBoat(boatId);
 
         // Then
-        assertThat(result).isNotNull();
+        assertThat(result).isFalse();
         
         verify(boatRepository).existsById(boatId);
         verify(boatRepository, never()).deleteById(any());
@@ -736,7 +729,7 @@ class BoatServiceTest {
         boolean result = boatService.deleteBoat(null);
 
         // Then
-        assertThat(result).isNotNull();
+        assertThat(result).isFalse();
         
         verify(boatRepository).existsById(null);
         verify(boatRepository, never()).deleteById(any());
@@ -749,7 +742,7 @@ class BoatServiceTest {
         when(boatRepository.existsById(boatId)).thenThrow(new RuntimeException("Database error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.deleteBoat(boatId));
+        assertThrows(RuntimeException.class, () -> boatService.deleteBoat(boatId));
         
         verify(boatRepository).existsById(boatId);
         verify(boatRepository, never()).deleteById(any());
@@ -763,7 +756,7 @@ class BoatServiceTest {
         doThrow(new RuntimeException("Delete error")).when(boatRepository).deleteById(boatId);
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.deleteBoat(boatId));
+        assertThrows(RuntimeException.class, () -> boatService.deleteBoat(boatId));
         
         verify(boatRepository).existsById(boatId);
         verify(boatRepository).deleteById(boatId);
@@ -853,7 +846,7 @@ class BoatServiceTest {
         when(boatRepository.findById(boatId)).thenReturn(Optional.of(testBoatEntity));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> boatService.updateBoatType(boatId, typeUpdateDto));
+        assertThrows(IllegalArgumentException.class, () -> boatService.updateBoatType(boatId, typeUpdateDto));
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository, never()).save(any());
@@ -869,7 +862,7 @@ class BoatServiceTest {
         when(boatRepository.save(any(BoatEntity.class))).thenThrow(new RuntimeException("Save error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatName(boatId, nameUpdateDto));
+        assertThrows(RuntimeException.class, () -> boatService.updateBoatName(boatId, nameUpdateDto));
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository).save(any(BoatEntity.class));
@@ -885,7 +878,7 @@ class BoatServiceTest {
         when(boatRepository.save(any(BoatEntity.class))).thenThrow(new RuntimeException("Save error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatDescription(boatId, descriptionUpdateDto));
+        assertThrows(RuntimeException.class, () -> boatService.updateBoatDescription(boatId, descriptionUpdateDto));
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository).save(any(BoatEntity.class));
@@ -901,7 +894,7 @@ class BoatServiceTest {
         when(boatRepository.save(any(BoatEntity.class))).thenThrow(new RuntimeException("Save error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatType(boatId, typeUpdateDto));
+        assertThrows(RuntimeException.class, () -> boatService.updateBoatType(boatId, typeUpdateDto));
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository).save(any(BoatEntity.class));
@@ -926,7 +919,7 @@ class BoatServiceTest {
         when(boatMapper.toDto(updatedEntity)).thenThrow(new RuntimeException("Mapping error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatName(boatId, nameUpdateDto));
+        assertThrows(RuntimeException.class, () -> boatService.updateBoatName(boatId, nameUpdateDto));
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository).save(any(BoatEntity.class));
@@ -951,7 +944,7 @@ class BoatServiceTest {
         when(boatMapper.toDto(updatedEntity)).thenThrow(new RuntimeException("Mapping error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatDescription(boatId, descriptionUpdateDto));
+        assertThrows(RuntimeException.class, () -> boatService.updateBoatDescription(boatId, descriptionUpdateDto));
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository).save(any(BoatEntity.class));
@@ -976,7 +969,7 @@ class BoatServiceTest {
         when(boatMapper.toDto(updatedEntity)).thenThrow(new RuntimeException("Mapping error"));
 
         // When & Then
-        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatType(boatId, typeUpdateDto));
+        assertThrows(RuntimeException.class, () -> boatService.updateBoatType(boatId, typeUpdateDto));
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository).save(any(BoatEntity.class));
