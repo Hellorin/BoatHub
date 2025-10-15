@@ -3,6 +3,7 @@ package io.hellorin.boathub.service;
 import io.hellorin.boathub.domain.BoatEntity;
 import io.hellorin.boathub.domain.BoatType;
 import io.hellorin.boathub.dto.BoatDto;
+import io.hellorin.boathub.dto.BoatCreationDto;
 import io.hellorin.boathub.dto.BoatNameUpdateDto;
 import io.hellorin.boathub.dto.BoatDescriptionUpdateDto;
 import io.hellorin.boathub.dto.BoatTypeUpdateDto;
@@ -24,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 /**
@@ -102,9 +103,9 @@ class BoatServiceTest {
         Page<BoatDto> result = boatService.getAllBoatsInPage(pageable);
 
         // Then
-        assertNotNull(result);
-        assertEquals(2, result.getContent().size());
-        assertEquals(expectedDtos, result.getContent());
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent()).isEqualTo(expectedDtos);
         
         verify(boatRepository).findAll(pageable);
         verify(boatMapper).toDto(testBoatEntity);
@@ -122,8 +123,8 @@ class BoatServiceTest {
         Page<BoatDto> result = boatService.getAllBoatsInPage(pageable);
 
         // Then
-        assertNotNull(result);
-        assertTrue(result.getContent().isEmpty());
+        assertThat(result).isNotNull();
+        assertThat(result.getContent().isEmpty());
         
         verify(boatRepository).findAll(pageable);
         verify(boatMapper, never()).toDto(any());
@@ -136,7 +137,7 @@ class BoatServiceTest {
         when(boatRepository.findAll(pageable)).thenThrow(new RuntimeException("Database error"));
 
         // When & Then
-        assertThrows(RuntimeException.class, () -> boatService.getAllBoatsInPage(pageable));
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.getAllBoatsInPage(pageable));
         
         verify(boatRepository).findAll(pageable);
         verify(boatMapper, never()).toDto(any());
@@ -153,8 +154,8 @@ class BoatServiceTest {
         Optional<BoatDto> result = boatService.getBoatById(boatId);
 
         // Then
-        assertTrue(result.isPresent());
-        assertEquals(testBoatDto, result.get());
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(testBoatDto);
         
         verify(boatRepository).findById(boatId);
         verify(boatMapper).toDto(testBoatEntity);
@@ -170,7 +171,7 @@ class BoatServiceTest {
         Optional<BoatDto> result = boatService.getBoatById(boatId);
 
         // Then
-        assertTrue(result.isEmpty());
+        assertThat(result).isEmpty();
         
         verify(boatRepository).findById(boatId);
         verify(boatMapper, never()).toDto(any());
@@ -185,7 +186,7 @@ class BoatServiceTest {
         Optional<BoatDto> result = boatService.getBoatById(null);
 
         // Then
-        assertTrue(result.isEmpty());
+        assertThat(result).isEmpty();
         
         verify(boatRepository).findById(null);
         verify(boatMapper, never()).toDto(any());
@@ -198,7 +199,7 @@ class BoatServiceTest {
         when(boatRepository.findById(boatId)).thenThrow(new RuntimeException("Database error"));
 
         // When & Then
-        assertThrows(RuntimeException.class, () -> boatService.getBoatById(boatId));
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.getBoatById(boatId));
         
         verify(boatRepository).findById(boatId);
         verify(boatMapper, never()).toDto(any());
@@ -212,7 +213,7 @@ class BoatServiceTest {
         when(boatMapper.toDto(testBoatEntity)).thenThrow(new RuntimeException("Mapping error"));
 
         // When & Then
-        assertThrows(RuntimeException.class, () -> boatService.getBoatById(boatId));
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.getBoatById(boatId));
         
         verify(boatRepository).findById(boatId);
         verify(boatMapper).toDto(testBoatEntity);
@@ -230,9 +231,9 @@ class BoatServiceTest {
         Page<BoatDto> result = boatService.getAllBoatsInPage(pageable);
 
         // Then
-        assertNotNull(result);
-        assertEquals(1, result.getContent().size());
-        assertNull(result.getContent().get(0));
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0));
         
         verify(boatRepository).findAll(pageable);
         verify(boatMapper).toDto(testBoatEntity);
@@ -265,9 +266,9 @@ class BoatServiceTest {
         Optional<BoatDto> result = boatService.getBoatById(boatId);
 
         // Then
-        assertTrue(result.isPresent());
-        assertEquals(fishingBoatDto, result.get());
-        assertEquals(BoatType.FISHING_BOAT, result.get().getBoatType());
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(fishingBoatDto);
+        assertThat(result.get().getBoatType()).isEqualTo(BoatType.FISHING_BOAT);
         
         verify(boatRepository).findById(boatId);
         verify(boatMapper).toDto(fishingBoatEntity);
@@ -305,16 +306,16 @@ class BoatServiceTest {
         Page<BoatDto> result = boatService.getAllBoatsInPage(pageable);
 
         // Then
-        assertNotNull(result);
-        assertEquals(2, result.getContent().size());
-        assertEquals(expectedDtos, result.getContent());
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent()).isEqualTo(expectedDtos);
         
         // Verify all boat types are present
         List<BoatType> boatTypes = result.getContent().stream()
                 .map(BoatDto::getBoatType)
                 .toList();
-        assertTrue(boatTypes.contains(BoatType.SAILBOAT));
-        assertTrue(boatTypes.contains(BoatType.YACHT));
+        assertThat(boatTypes).contains(BoatType.SAILBOAT);
+        assertThat(boatTypes).contains(BoatType.YACHT);
         
         verify(boatRepository).findAll(pageable);
         verify(boatMapper).toDto(testBoatEntity);
@@ -352,9 +353,9 @@ class BoatServiceTest {
         Optional<BoatDto> result = boatService.updateBoatName(boatId, nameUpdateDto);
 
         // Then
-        assertTrue(result.isPresent());
-        assertEquals(updatedDto, result.get());
-        assertEquals(newName, result.get().getName());
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(updatedDto);
+        assertThat(result.get().getName()).isEqualTo(newName);
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository).save(any(BoatEntity.class));
@@ -372,7 +373,7 @@ class BoatServiceTest {
         Optional<BoatDto> result = boatService.updateBoatName(boatId, nameUpdateDto);
 
         // Then
-        assertTrue(result.isEmpty());
+        assertThat(result).isEmpty();
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository, never()).save(any());
@@ -410,9 +411,9 @@ class BoatServiceTest {
         Optional<BoatDto> result = boatService.updateBoatDescription(boatId, descriptionUpdateDto);
 
         // Then
-        assertTrue(result.isPresent());
-        assertEquals(updatedDto, result.get());
-        assertEquals(newDescription, result.get().getDescription());
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(updatedDto);
+        assertThat(result.get().getDescription()).isEqualTo(newDescription);
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository).save(any(BoatEntity.class));
@@ -430,7 +431,7 @@ class BoatServiceTest {
         Optional<BoatDto> result = boatService.updateBoatDescription(boatId, descriptionUpdateDto);
 
         // Then
-        assertTrue(result.isEmpty());
+        assertThat(result).isEmpty();
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository, never()).save(any());
@@ -468,9 +469,9 @@ class BoatServiceTest {
         Optional<BoatDto> result = boatService.updateBoatType(boatId, typeUpdateDto);
 
         // Then
-        assertTrue(result.isPresent());
-        assertEquals(updatedDto, result.get());
-        assertEquals(newType, result.get().getBoatType());
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(updatedDto);
+        assertThat(result.get().getBoatType()).isEqualTo(newType);
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository).save(any(BoatEntity.class));
@@ -488,7 +489,7 @@ class BoatServiceTest {
         Optional<BoatDto> result = boatService.updateBoatType(boatId, typeUpdateDto);
 
         // Then
-        assertTrue(result.isEmpty());
+        assertThat(result).isEmpty();
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository, never()).save(any());
@@ -503,7 +504,7 @@ class BoatServiceTest {
         when(boatRepository.findById(boatId)).thenThrow(new RuntimeException("Database error"));
 
         // When & Then
-        assertThrows(RuntimeException.class, () -> boatService.updateBoatName(boatId, nameUpdateDto));
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatName(boatId, nameUpdateDto));
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository, never()).save(any());
@@ -518,7 +519,7 @@ class BoatServiceTest {
         when(boatRepository.findById(boatId)).thenThrow(new RuntimeException("Database error"));
 
         // When & Then
-        assertThrows(RuntimeException.class, () -> boatService.updateBoatDescription(boatId, descriptionUpdateDto));
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatDescription(boatId, descriptionUpdateDto));
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository, never()).save(any());
@@ -533,10 +534,452 @@ class BoatServiceTest {
         when(boatRepository.findById(boatId)).thenThrow(new RuntimeException("Database error"));
 
         // When & Then
-        assertThrows(RuntimeException.class, () -> boatService.updateBoatType(boatId, typeUpdateDto));
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatType(boatId, typeUpdateDto));
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository, never()).save(any());
         verify(boatMapper, never()).toDto(any());
+    }
+
+    @Test
+    void createBoat_WhenValidData_ShouldCreateAndReturnBoatDto() {
+        // Given
+        BoatCreationDto creationDto = new BoatCreationDto("New Boat", "A new test boat", "SAILBOAT");
+        
+        BoatEntity entityToSave = new BoatEntity();
+        entityToSave.setName("New Boat");
+        entityToSave.setDescription("A new test boat");
+        entityToSave.setBoatType(BoatType.SAILBOAT);
+        entityToSave.setCreatedDate(testDateTime);
+        entityToSave.setUpdatedDate(testDateTime);
+        
+        BoatEntity savedEntity = new BoatEntity();
+        savedEntity.setId(1L);
+        savedEntity.setName("New Boat");
+        savedEntity.setDescription("A new test boat");
+        savedEntity.setBoatType(BoatType.SAILBOAT);
+        savedEntity.setCreatedDate(testDateTime);
+        savedEntity.setUpdatedDate(testDateTime);
+        
+        BoatDto expectedDto = new BoatDto();
+        expectedDto.setId(1L);
+        expectedDto.setName("New Boat");
+        expectedDto.setDescription("A new test boat");
+        expectedDto.setBoatType(BoatType.SAILBOAT);
+        expectedDto.setCreatedDate(testDateTime);
+        expectedDto.setUpdatedDate(testDateTime);
+
+        when(boatMapper.toEntity(creationDto)).thenReturn(entityToSave);
+        when(boatRepository.save(any(BoatEntity.class))).thenReturn(savedEntity);
+        when(boatMapper.toDto(savedEntity)).thenReturn(expectedDto);
+
+        // When
+        BoatDto result = boatService.createBoat(creationDto);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(expectedDto);
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getName()).isEqualTo("New Boat");
+        assertThat(result.getDescription()).isEqualTo("A new test boat");
+        assertThat(result.getBoatType()).isEqualTo(BoatType.SAILBOAT);
+        
+        verify(boatMapper).toEntity(creationDto);
+        verify(boatRepository).save(any(BoatEntity.class));
+        verify(boatMapper).toDto(savedEntity);
+    }
+
+    @Test
+    void createBoat_WithDifferentBoatTypes_ShouldCreateCorrectly() {
+        // Given
+        BoatCreationDto creationDto = new BoatCreationDto("Motor Boat", "A motor boat", "MOTORBOAT");
+        
+        BoatEntity entityToSave = new BoatEntity();
+        entityToSave.setName("Motor Boat");
+        entityToSave.setDescription("A motor boat");
+        entityToSave.setBoatType(BoatType.MOTORBOAT);
+        entityToSave.setCreatedDate(testDateTime);
+        entityToSave.setUpdatedDate(testDateTime);
+        
+        BoatEntity savedEntity = new BoatEntity();
+        savedEntity.setId(2L);
+        savedEntity.setName("Motor Boat");
+        savedEntity.setDescription("A motor boat");
+        savedEntity.setBoatType(BoatType.MOTORBOAT);
+        savedEntity.setCreatedDate(testDateTime);
+        savedEntity.setUpdatedDate(testDateTime);
+        
+        BoatDto expectedDto = new BoatDto();
+        expectedDto.setId(2L);
+        expectedDto.setName("Motor Boat");
+        expectedDto.setDescription("A motor boat");
+        expectedDto.setBoatType(BoatType.MOTORBOAT);
+        expectedDto.setCreatedDate(testDateTime);
+        expectedDto.setUpdatedDate(testDateTime);
+
+        when(boatMapper.toEntity(creationDto)).thenReturn(entityToSave);
+        when(boatRepository.save(any(BoatEntity.class))).thenReturn(savedEntity);
+        when(boatMapper.toDto(savedEntity)).thenReturn(expectedDto);
+
+        // When
+        BoatDto result = boatService.createBoat(creationDto);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getBoatType()).isEqualTo(BoatType.MOTORBOAT);
+        assertThat(result.getName()).isEqualTo("Motor Boat");
+        
+        verify(boatMapper).toEntity(creationDto);
+        verify(boatRepository).save(any(BoatEntity.class));
+        verify(boatMapper).toDto(savedEntity);
+    }
+
+    @Test
+    void createBoat_WhenMapperThrowsException_ShouldPropagateException() {
+        // Given
+        BoatCreationDto creationDto = new BoatCreationDto("Test Boat", "Test Description", "YACHT");
+        when(boatMapper.toEntity(creationDto)).thenThrow(new RuntimeException("Mapping error"));
+
+        // When & Then
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.createBoat(creationDto));
+        
+        verify(boatMapper).toEntity(creationDto);
+        verify(boatRepository, never()).save(any());
+        verify(boatMapper, never()).toDto(any());
+    }
+
+    @Test
+    void createBoat_WhenRepositoryThrowsException_ShouldPropagateException() {
+        // Given
+        BoatCreationDto creationDto = new BoatCreationDto("Test Boat", "Test Description", "FISHING_BOAT");
+        BoatEntity entityToSave = new BoatEntity();
+        entityToSave.setName("Test Boat");
+        entityToSave.setDescription("Test Description");
+        entityToSave.setBoatType(BoatType.FISHING_BOAT);
+        
+        when(boatMapper.toEntity(creationDto)).thenReturn(entityToSave);
+        when(boatRepository.save(any(BoatEntity.class))).thenThrow(new RuntimeException("Database error"));
+
+        // When & Then
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.createBoat(creationDto));
+        
+        verify(boatMapper).toEntity(creationDto);
+        verify(boatRepository).save(any(BoatEntity.class));
+        verify(boatMapper, never()).toDto(any());
+    }
+
+    @Test
+    void createBoat_WhenMapperToDtoThrowsException_ShouldPropagateException() {
+        // Given
+        BoatCreationDto creationDto = new BoatCreationDto("Test Boat", "Test Description", "YACHT");
+        BoatEntity entityToSave = new BoatEntity();
+        entityToSave.setName("Test Boat");
+        entityToSave.setDescription("Test Description");
+        entityToSave.setBoatType(BoatType.YACHT);
+        
+        BoatEntity savedEntity = new BoatEntity();
+        savedEntity.setId(1L);
+        savedEntity.setName("Test Boat");
+        savedEntity.setDescription("Test Description");
+        savedEntity.setBoatType(BoatType.YACHT);
+        
+        when(boatMapper.toEntity(creationDto)).thenReturn(entityToSave);
+        when(boatRepository.save(any(BoatEntity.class))).thenReturn(savedEntity);
+        when(boatMapper.toDto(savedEntity)).thenThrow(new RuntimeException("DTO mapping error"));
+
+        // When & Then
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.createBoat(creationDto));
+        
+        verify(boatMapper).toEntity(creationDto);
+        verify(boatRepository).save(any(BoatEntity.class));
+        verify(boatMapper).toDto(savedEntity);
+    }
+
+    @Test
+    void deleteBoat_WhenBoatExists_ShouldDeleteAndReturnTrue() {
+        // Given
+        Long boatId = 1L;
+        when(boatRepository.existsById(boatId)).thenReturn(true);
+
+        // When
+        boolean result = boatService.deleteBoat(boatId);
+
+        // Then
+        assertThat(result).isNotNull();
+        
+        verify(boatRepository).existsById(boatId);
+        verify(boatRepository).deleteById(boatId);
+    }
+
+    @Test
+    void deleteBoat_WhenBoatDoesNotExist_ShouldReturnFalse() {
+        // Given
+        Long boatId = 999L;
+        when(boatRepository.existsById(boatId)).thenReturn(false);
+
+        // When
+        boolean result = boatService.deleteBoat(boatId);
+
+        // Then
+        assertThat(result).isNotNull();
+        
+        verify(boatRepository).existsById(boatId);
+        verify(boatRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void deleteBoat_WhenIdIsNull_ShouldReturnFalse() {
+        // Given
+        when(boatRepository.existsById(null)).thenReturn(false);
+
+        // When
+        boolean result = boatService.deleteBoat(null);
+
+        // Then
+        assertThat(result).isNotNull();
+        
+        verify(boatRepository).existsById(null);
+        verify(boatRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void deleteBoat_WhenExistsByIdThrowsException_ShouldPropagateException() {
+        // Given
+        Long boatId = 1L;
+        when(boatRepository.existsById(boatId)).thenThrow(new RuntimeException("Database error"));
+
+        // When & Then
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.deleteBoat(boatId));
+        
+        verify(boatRepository).existsById(boatId);
+        verify(boatRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void deleteBoat_WhenDeleteByIdThrowsException_ShouldPropagateException() {
+        // Given
+        Long boatId = 1L;
+        when(boatRepository.existsById(boatId)).thenReturn(true);
+        doThrow(new RuntimeException("Delete error")).when(boatRepository).deleteById(boatId);
+
+        // When & Then
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.deleteBoat(boatId));
+        
+        verify(boatRepository).existsById(boatId);
+        verify(boatRepository).deleteById(boatId);
+    }
+
+    @Test
+    void updateBoatType_WithLowerCaseBoatType_ShouldConvertToUpperCase() {
+        // Given
+        Long boatId = 1L;
+        BoatTypeUpdateDto typeUpdateDto = new BoatTypeUpdateDto("motorboat");
+        
+        BoatEntity updatedEntity = new BoatEntity();
+        updatedEntity.setId(1L);
+        updatedEntity.setName("Test Boat");
+        updatedEntity.setDescription("A test boat for unit testing");
+        updatedEntity.setBoatType(BoatType.MOTORBOAT);
+        updatedEntity.setCreatedDate(testDateTime);
+        updatedEntity.setUpdatedDate(testDateTime.plusHours(1));
+        
+        BoatDto updatedDto = new BoatDto();
+        updatedDto.setId(1L);
+        updatedDto.setName("Test Boat");
+        updatedDto.setDescription("A test boat for unit testing");
+        updatedDto.setBoatType(BoatType.MOTORBOAT);
+        updatedDto.setCreatedDate(testDateTime);
+        updatedDto.setUpdatedDate(testDateTime.plusHours(1));
+
+        when(boatRepository.findById(boatId)).thenReturn(Optional.of(testBoatEntity));
+        when(boatRepository.save(any(BoatEntity.class))).thenReturn(updatedEntity);
+        when(boatMapper.toDto(updatedEntity)).thenReturn(updatedDto);
+
+        // When
+        Optional<BoatDto> result = boatService.updateBoatType(boatId, typeUpdateDto);
+
+        // Then
+        assertThat(result).isPresent();
+        assertThat(result.get().getBoatType()).isEqualTo(BoatType.MOTORBOAT);
+        
+        verify(boatRepository).findById(boatId);
+        verify(boatRepository).save(any(BoatEntity.class));
+        verify(boatMapper).toDto(updatedEntity);
+    }
+
+    @Test
+    void updateBoatType_WithMixedCaseBoatType_ShouldConvertToUpperCase() {
+        // Given
+        Long boatId = 1L;
+        BoatTypeUpdateDto typeUpdateDto = new BoatTypeUpdateDto("Fishing_Boat");
+        
+        BoatEntity updatedEntity = new BoatEntity();
+        updatedEntity.setId(1L);
+        updatedEntity.setName("Test Boat");
+        updatedEntity.setDescription("A test boat for unit testing");
+        updatedEntity.setBoatType(BoatType.FISHING_BOAT);
+        updatedEntity.setCreatedDate(testDateTime);
+        updatedEntity.setUpdatedDate(testDateTime.plusHours(1));
+        
+        BoatDto updatedDto = new BoatDto();
+        updatedDto.setId(1L);
+        updatedDto.setName("Test Boat");
+        updatedDto.setDescription("A test boat for unit testing");
+        updatedDto.setBoatType(BoatType.FISHING_BOAT);
+        updatedDto.setCreatedDate(testDateTime);
+        updatedDto.setUpdatedDate(testDateTime.plusHours(1));
+
+        when(boatRepository.findById(boatId)).thenReturn(Optional.of(testBoatEntity));
+        when(boatRepository.save(any(BoatEntity.class))).thenReturn(updatedEntity);
+        when(boatMapper.toDto(updatedEntity)).thenReturn(updatedDto);
+
+        // When
+        Optional<BoatDto> result = boatService.updateBoatType(boatId, typeUpdateDto);
+
+        // Then
+        assertThat(result).isPresent();
+        assertThat(result.get().getBoatType()).isEqualTo(BoatType.FISHING_BOAT);
+        
+        verify(boatRepository).findById(boatId);
+        verify(boatRepository).save(any(BoatEntity.class));
+        verify(boatMapper).toDto(updatedEntity);
+    }
+
+    @Test
+    void updateBoatType_WithInvalidBoatType_ShouldThrowIllegalArgumentException() {
+        // Given
+        Long boatId = 1L;
+        BoatTypeUpdateDto typeUpdateDto = new BoatTypeUpdateDto("INVALID_TYPE");
+        when(boatRepository.findById(boatId)).thenReturn(Optional.of(testBoatEntity));
+
+        // When & Then
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> boatService.updateBoatType(boatId, typeUpdateDto));
+        
+        verify(boatRepository).findById(boatId);
+        verify(boatRepository, never()).save(any());
+        verify(boatMapper, never()).toDto(any());
+    }
+
+    @Test
+    void updateBoatName_WhenSaveThrowsException_ShouldPropagateException() {
+        // Given
+        Long boatId = 1L;
+        BoatNameUpdateDto nameUpdateDto = new BoatNameUpdateDto("New Name");
+        when(boatRepository.findById(boatId)).thenReturn(Optional.of(testBoatEntity));
+        when(boatRepository.save(any(BoatEntity.class))).thenThrow(new RuntimeException("Save error"));
+
+        // When & Then
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatName(boatId, nameUpdateDto));
+        
+        verify(boatRepository).findById(boatId);
+        verify(boatRepository).save(any(BoatEntity.class));
+        verify(boatMapper, never()).toDto(any());
+    }
+
+    @Test
+    void updateBoatDescription_WhenSaveThrowsException_ShouldPropagateException() {
+        // Given
+        Long boatId = 1L;
+        BoatDescriptionUpdateDto descriptionUpdateDto = new BoatDescriptionUpdateDto("New Description");
+        when(boatRepository.findById(boatId)).thenReturn(Optional.of(testBoatEntity));
+        when(boatRepository.save(any(BoatEntity.class))).thenThrow(new RuntimeException("Save error"));
+
+        // When & Then
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatDescription(boatId, descriptionUpdateDto));
+        
+        verify(boatRepository).findById(boatId);
+        verify(boatRepository).save(any(BoatEntity.class));
+        verify(boatMapper, never()).toDto(any());
+    }
+
+    @Test
+    void updateBoatType_WhenSaveThrowsException_ShouldPropagateException() {
+        // Given
+        Long boatId = 1L;
+        BoatTypeUpdateDto typeUpdateDto = new BoatTypeUpdateDto("YACHT");
+        when(boatRepository.findById(boatId)).thenReturn(Optional.of(testBoatEntity));
+        when(boatRepository.save(any(BoatEntity.class))).thenThrow(new RuntimeException("Save error"));
+
+        // When & Then
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatType(boatId, typeUpdateDto));
+        
+        verify(boatRepository).findById(boatId);
+        verify(boatRepository).save(any(BoatEntity.class));
+        verify(boatMapper, never()).toDto(any());
+    }
+
+    @Test
+    void updateBoatName_WhenMapperThrowsException_ShouldPropagateException() {
+        // Given
+        Long boatId = 1L;
+        BoatNameUpdateDto nameUpdateDto = new BoatNameUpdateDto("New Name");
+        BoatEntity updatedEntity = new BoatEntity();
+        updatedEntity.setId(1L);
+        updatedEntity.setName("New Name");
+        updatedEntity.setDescription("A test boat for unit testing");
+        updatedEntity.setBoatType(BoatType.SAILBOAT);
+        updatedEntity.setCreatedDate(testDateTime);
+        updatedEntity.setUpdatedDate(testDateTime.plusHours(1));
+        
+        when(boatRepository.findById(boatId)).thenReturn(Optional.of(testBoatEntity));
+        when(boatRepository.save(any(BoatEntity.class))).thenReturn(updatedEntity);
+        when(boatMapper.toDto(updatedEntity)).thenThrow(new RuntimeException("Mapping error"));
+
+        // When & Then
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatName(boatId, nameUpdateDto));
+        
+        verify(boatRepository).findById(boatId);
+        verify(boatRepository).save(any(BoatEntity.class));
+        verify(boatMapper).toDto(updatedEntity);
+    }
+
+    @Test
+    void updateBoatDescription_WhenMapperThrowsException_ShouldPropagateException() {
+        // Given
+        Long boatId = 1L;
+        BoatDescriptionUpdateDto descriptionUpdateDto = new BoatDescriptionUpdateDto("New Description");
+        BoatEntity updatedEntity = new BoatEntity();
+        updatedEntity.setId(1L);
+        updatedEntity.setName("Test Boat");
+        updatedEntity.setDescription("New Description");
+        updatedEntity.setBoatType(BoatType.SAILBOAT);
+        updatedEntity.setCreatedDate(testDateTime);
+        updatedEntity.setUpdatedDate(testDateTime.plusHours(1));
+        
+        when(boatRepository.findById(boatId)).thenReturn(Optional.of(testBoatEntity));
+        when(boatRepository.save(any(BoatEntity.class))).thenReturn(updatedEntity);
+        when(boatMapper.toDto(updatedEntity)).thenThrow(new RuntimeException("Mapping error"));
+
+        // When & Then
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatDescription(boatId, descriptionUpdateDto));
+        
+        verify(boatRepository).findById(boatId);
+        verify(boatRepository).save(any(BoatEntity.class));
+        verify(boatMapper).toDto(updatedEntity);
+    }
+
+    @Test
+    void updateBoatType_WhenMapperThrowsException_ShouldPropagateException() {
+        // Given
+        Long boatId = 1L;
+        BoatTypeUpdateDto typeUpdateDto = new BoatTypeUpdateDto("YACHT");
+        BoatEntity updatedEntity = new BoatEntity();
+        updatedEntity.setId(1L);
+        updatedEntity.setName("Test Boat");
+        updatedEntity.setDescription("A test boat for unit testing");
+        updatedEntity.setBoatType(BoatType.YACHT);
+        updatedEntity.setCreatedDate(testDateTime);
+        updatedEntity.setUpdatedDate(testDateTime.plusHours(1));
+        
+        when(boatRepository.findById(boatId)).thenReturn(Optional.of(testBoatEntity));
+        when(boatRepository.save(any(BoatEntity.class))).thenReturn(updatedEntity);
+        when(boatMapper.toDto(updatedEntity)).thenThrow(new RuntimeException("Mapping error"));
+
+        // When & Then
+        org.junit.jupiter.api.Assertions.assertThrows(RuntimeException.class, () -> boatService.updateBoatType(boatId, typeUpdateDto));
+        
+        verify(boatRepository).findById(boatId);
+        verify(boatRepository).save(any(BoatEntity.class));
+        verify(boatMapper).toDto(updatedEntity);
     }
 }

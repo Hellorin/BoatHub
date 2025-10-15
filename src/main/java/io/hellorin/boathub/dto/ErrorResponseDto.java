@@ -8,17 +8,15 @@ import java.time.LocalDateTime;
 public class ErrorResponseDto {
     
     private String message;
-    private String error;
-    private LocalDateTime timestamp;
+    private final LocalDateTime timestamp;
 
     public ErrorResponseDto() {
         this.timestamp = LocalDateTime.now();
     }
 
-    public ErrorResponseDto(String message, String error) {
+    public ErrorResponseDto(String message) {
         this();
         this.message = message;
-        this.error = error;
     }
 
     public String getMessage() {
@@ -29,19 +27,8 @@ public class ErrorResponseDto {
         this.message = message;
     }
 
-    public String getError() {
-        return error;
-    }
-
-    public void setError(String error) {
-        this.error = error;
-    }
-
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
 }

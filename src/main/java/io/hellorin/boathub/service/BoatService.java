@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
@@ -59,9 +58,7 @@ public class BoatService {
      */
     public BoatDto createBoat(BoatCreationDto boatCreationDto) {
         BoatEntity boatEntity = boatMapper.toEntity(boatCreationDto);
-        boatEntity.setCreatedDate(LocalDateTime.now());
-        boatEntity.setUpdatedDate(LocalDateTime.now());
-        
+
         BoatEntity savedEntity = boatRepository.save(boatEntity);
         return boatMapper.toDto(savedEntity);
     }
@@ -77,7 +74,6 @@ public class BoatService {
         return boatRepository.findById(id)
                 .map(existingBoat -> {
                     existingBoat.setName(boatNameUpdateDto.getName());
-                    existingBoat.setUpdatedDate(LocalDateTime.now());
                     
                     BoatEntity savedEntity = boatRepository.save(existingBoat);
                     return boatMapper.toDto(savedEntity);
@@ -94,7 +90,6 @@ public class BoatService {
         return boatRepository.findById(id)
                 .map(existingBoat -> {
                     existingBoat.setDescription(boatDescriptionUpdateDto.getDescription());
-                    existingBoat.setUpdatedDate(LocalDateTime.now());
                     
                     BoatEntity savedEntity = boatRepository.save(existingBoat);
                     return boatMapper.toDto(savedEntity);
@@ -113,7 +108,6 @@ public class BoatService {
                     // Convert String to BoatType enum
                     BoatType boatType = BoatType.valueOf(boatTypeUpdateDto.getBoatType().toUpperCase());
                     existingBoat.setBoatType(boatType);
-                    existingBoat.setUpdatedDate(LocalDateTime.now());
                     
                     BoatEntity savedEntity = boatRepository.save(existingBoat);
                     return boatMapper.toDto(savedEntity);

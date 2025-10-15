@@ -25,6 +25,8 @@ import java.util.Optional;
 /**
  * REST controller for boat-related API endpoints.
  * Handles HTTP requests for boat operations.
+ *
+ * TODO: Adding rate limiting would be interesting in the future
  */
 @RestController
 @RequestMapping("/api/v1/boats")
@@ -119,7 +121,7 @@ public class BoatV1Controller {
     public ResponseEntity<BoatDto> createBoat(
             @Parameter(description = "Boat data to create")
             @Valid @RequestBody BoatCreationDto boatCreationDto) {
-        var createdBoat = boatService.createBoat(boatCreationDto);
+        BoatDto createdBoat = boatService.createBoat(boatCreationDto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .location(java.net.URI.create("/api/v1/boats/" + createdBoat.getId()))
@@ -202,7 +204,7 @@ public class BoatV1Controller {
             @PathVariable("id") Long id,
             @Parameter(description = "New boat type")
             @Valid @RequestBody BoatTypeUpdateDto boatTypeUpdateDto) {
-        var updatedBoat = boatService.updateBoatType(id, boatTypeUpdateDto);
+        Optional<BoatDto> updatedBoat = boatService.updateBoatType(id, boatTypeUpdateDto);
         
         return updatedBoat.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

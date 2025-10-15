@@ -23,8 +23,9 @@ public class ValidBoatTypeValidator implements ConstraintValidator<ValidBoatType
         }
         
         // Check if the string represents a valid boat type enum value
+        // Trim the input to handle spaces before and after the boat type
         try {
-            BoatType.valueOf(boatType.toUpperCase());
+            BoatType.valueOf(boatType.trim().toUpperCase());
             return true;
         } catch (IllegalArgumentException e) {
             return false;

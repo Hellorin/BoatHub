@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * This class serves as the entry point for the application.
  */
 @SpringBootApplication
-@EnableJpaRepositories(basePackages = "io.hellorin.boathub.repository")
 public class BoatHubApplication {
 
     /**

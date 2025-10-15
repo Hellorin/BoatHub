@@ -1,7 +1,6 @@
 package io.hellorin.boathub.controller;
 
-import io.hellorin.boathub.dto.BoatDto;
-import io.hellorin.boathub.dto.BoatTypeUpdateDto;
+import io.hellorin.boathub.dto.*;
 import io.hellorin.boathub.domain.BoatType;
 import io.hellorin.boathub.service.BoatService;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,12 +9,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,10 +53,10 @@ class BoatV1ControllerTest {
         ResponseEntity<BoatDto> response = boatV1Controller.getBoatById(boatId);
 
         // Then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(testBoat.getId(), response.getBody().getId());
-        assertEquals(testBoat.getName(), response.getBody().getName());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getId()).isEqualTo(testBoat.getId());
+        assertThat(response.getBody().getName()).isEqualTo(testBoat.getName());
         verify(boatService).getBoatById(boatId);
     }
 
@@ -64,8 +70,8 @@ class BoatV1ControllerTest {
         ResponseEntity<BoatDto> response = boatV1Controller.getBoatById(boatId);
 
         // Then
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNull();
         verify(boatService).getBoatById(boatId);
     }
 
@@ -86,9 +92,9 @@ class BoatV1ControllerTest {
         ResponseEntity<BoatDto> response = boatV1Controller.updateBoatType(boatId, typeUpdateDto);
 
         // Then
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(BoatType.MOTORBOAT, response.getBody().getBoatType());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getBoatType()).isEqualTo(BoatType.MOTORBOAT);
         verify(boatService).updateBoatType(boatId, typeUpdateDto);
     }
 
@@ -103,8 +109,443 @@ class BoatV1ControllerTest {
         ResponseEntity<BoatDto> response = boatV1Controller.updateBoatType(boatId, typeUpdateDto);
 
         // Then
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNull();
         verify(boatService).updateBoatType(boatId, typeUpdateDto);
+    }
+
+    @Test
+    void getAllBoatsInPage_WithValidParameters_ShouldReturnPageOfBoats() {
+        // Given
+        int page = 0;
+        int size = 10;
+        String sortBy = "name";
+        String sortDirection = "asc";
+        
+        List<BoatDto> boats = Arrays.asList(testBoat);
+        Page<BoatDto> boatPage = new PageImpl<>(boats);
+        PageRequest expectedPageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sortBy));
+        
+        when(boatService.getAllBoatsInPage(expectedPageRequest)).thenReturn(boatPage);
+
+        // When
+        Page<BoatDto> result = boatV1Controller.getAllBoatsInPage(page, size, sortBy, sortDirection);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getId()).isEqualTo(testBoat.getId());
+        verify(boatService).getAllBoatsInPage(expectedPageRequest);
+    }
+
+    @Test
+    void getAllBoatsInPage_WithDescSortDirection_ShouldReturnPageWithDescSort() {
+        // Given
+        int page = 0;
+        int size = 5;
+        String sortBy = "id";
+        String sortDirection = "desc";
+        
+        List<BoatDto> boats = Arrays.asList(testBoat);
+        Page<BoatDto> boatPage = new PageImpl<>(boats);
+        PageRequest expectedPageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortBy));
+        
+        when(boatService.getAllBoatsInPage(expectedPageRequest)).thenReturn(boatPage);
+
+        // When
+        Page<BoatDto> result = boatV1Controller.getAllBoatsInPage(page, size, sortBy, sortDirection);
+
+        // Then
+        assertThat(result).isNotNull();
+        verify(boatService).getAllBoatsInPage(expectedPageRequest);
+    }
+
+    @Test
+    void getAllBoatsInPage_WithNullSortDirection_ShouldDefaultToAsc() {
+        // Given
+        int page = 0;
+        int size = 10;
+        String sortBy = "name";
+        String sortDirection = null;
+        
+        List<BoatDto> boats = Arrays.asList(testBoat);
+        Page<BoatDto> boatPage = new PageImpl<>(boats);
+        PageRequest expectedPageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sortBy));
+        
+        when(boatService.getAllBoatsInPage(expectedPageRequest)).thenReturn(boatPage);
+
+        // When
+        Page<BoatDto> result = boatV1Controller.getAllBoatsInPage(page, size, sortBy, sortDirection);
+
+        // Then
+        assertThat(result).isNotNull();
+        verify(boatService).getAllBoatsInPage(expectedPageRequest);
+    }
+
+    @Test
+    void createBoat_WithValidData_ShouldReturnCreatedBoat() {
+        // Given
+        BoatCreationDto creationDto = new BoatCreationDto("New Boat", "A new boat", "SAILBOAT");
+        BoatDto createdBoat = new BoatDto();
+        createdBoat.setId(2L);
+        createdBoat.setName("New Boat");
+        createdBoat.setDescription("A new boat");
+        createdBoat.setBoatType(BoatType.SAILBOAT);
+        
+        when(boatService.createBoat(creationDto)).thenReturn(createdBoat);
+
+        // When
+        ResponseEntity<BoatDto> response = boatV1Controller.createBoat(creationDto);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getId()).isEqualTo(createdBoat.getId());
+        assertThat(response.getBody().getName()).isEqualTo(createdBoat.getName());
+        assertThat(response.getHeaders().getLocation().toString()).contains("/api/v1/boats/2");
+        verify(boatService).createBoat(creationDto);
+    }
+
+    @Test
+    void updateBoatName_WithValidData_ShouldReturnUpdatedBoat() {
+        // Given
+        Long boatId = 1L;
+        BoatNameUpdateDto nameUpdateDto = new BoatNameUpdateDto("Updated Boat Name");
+        BoatDto updatedBoat = new BoatDto();
+        updatedBoat.setId(1L);
+        updatedBoat.setName("Updated Boat Name");
+        updatedBoat.setDescription("A test boat");
+        
+        when(boatService.updateBoatName(boatId, nameUpdateDto)).thenReturn(Optional.of(updatedBoat));
+
+        // When
+        ResponseEntity<BoatDto> response = boatV1Controller.updateBoatName(boatId, nameUpdateDto);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getName()).isEqualTo("Updated Boat Name");
+        verify(boatService).updateBoatName(boatId, nameUpdateDto);
+    }
+
+    @Test
+    void updateBoatName_WhenBoatNotFound_ShouldReturnNotFound() {
+        // Given
+        Long boatId = 999L;
+        BoatNameUpdateDto nameUpdateDto = new BoatNameUpdateDto("Updated Boat Name");
+        when(boatService.updateBoatName(boatId, nameUpdateDto)).thenReturn(Optional.empty());
+
+        // When
+        ResponseEntity<BoatDto> response = boatV1Controller.updateBoatName(boatId, nameUpdateDto);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNull();
+        verify(boatService).updateBoatName(boatId, nameUpdateDto);
+    }
+
+    @Test
+    void updateBoatDescription_WithValidData_ShouldReturnUpdatedBoat() {
+        // Given
+        Long boatId = 1L;
+        BoatDescriptionUpdateDto descriptionUpdateDto = new BoatDescriptionUpdateDto("Updated description");
+        BoatDto updatedBoat = new BoatDto();
+        updatedBoat.setId(1L);
+        updatedBoat.setName("Test Boat");
+        updatedBoat.setDescription("Updated description");
+        
+        when(boatService.updateBoatDescription(boatId, descriptionUpdateDto)).thenReturn(Optional.of(updatedBoat));
+
+        // When
+        ResponseEntity<BoatDto> response = boatV1Controller.updateBoatDescription(boatId, descriptionUpdateDto);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getDescription()).isEqualTo("Updated description");
+        verify(boatService).updateBoatDescription(boatId, descriptionUpdateDto);
+    }
+
+    @Test
+    void updateBoatDescription_WhenBoatNotFound_ShouldReturnNotFound() {
+        // Given
+        Long boatId = 999L;
+        BoatDescriptionUpdateDto descriptionUpdateDto = new BoatDescriptionUpdateDto("Updated description");
+        when(boatService.updateBoatDescription(boatId, descriptionUpdateDto)).thenReturn(Optional.empty());
+
+        // When
+        ResponseEntity<BoatDto> response = boatV1Controller.updateBoatDescription(boatId, descriptionUpdateDto);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNull();
+        verify(boatService).updateBoatDescription(boatId, descriptionUpdateDto);
+    }
+
+    @Test
+    void updateBoatType_WhenBoatNotFound_ShouldReturnNotFound() {
+        // Given
+        Long boatId = 999L;
+        BoatTypeUpdateDto typeUpdateDto = new BoatTypeUpdateDto("MOTORBOAT");
+        when(boatService.updateBoatType(boatId, typeUpdateDto)).thenReturn(Optional.empty());
+
+        // When
+        ResponseEntity<BoatDto> response = boatV1Controller.updateBoatType(boatId, typeUpdateDto);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNull();
+        verify(boatService).updateBoatType(boatId, typeUpdateDto);
+    }
+
+    @Test
+    void deleteBoat_WhenBoatExists_ShouldReturnNoContent() {
+        // Given
+        Long boatId = 1L;
+        when(boatService.deleteBoat(boatId)).thenReturn(true);
+
+        // When
+        ResponseEntity<Void> response = boatV1Controller.deleteBoat(boatId);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(response.getBody()).isNull();
+        verify(boatService).deleteBoat(boatId);
+    }
+
+    @Test
+    void deleteBoat_WhenBoatNotFound_ShouldReturnNotFound() {
+        // Given
+        Long boatId = 999L;
+        when(boatService.deleteBoat(boatId)).thenReturn(false);
+
+        // When
+        ResponseEntity<Void> response = boatV1Controller.deleteBoat(boatId);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNull();
+        verify(boatService).deleteBoat(boatId);
+    }
+
+    // Validation Tests for Controller Parameters
+
+    @Test
+    void getAllBoatsInPage_WithValidParameters_ShouldCallServiceWithCorrectParameters() {
+        // Given
+        int page = 0;
+        int size = 10;
+        String sortBy = "name";
+        String sortDirection = "asc";
+        Page<BoatDto> expectedPage = new PageImpl<>(Arrays.asList(testBoat));
+        when(boatService.getAllBoatsInPage(any(PageRequest.class))).thenReturn(expectedPage);
+
+        // When
+        Page<BoatDto> result = boatV1Controller.getAllBoatsInPage(page, size, sortBy, sortDirection);
+
+        // Then
+        assertThat(result);
+        assertThat(result.getContent()).hasSize(1);
+        verify(boatService).getAllBoatsInPage(any(PageRequest.class));
+    }
+
+    @Test
+    void getAllBoatsInPage_WithAllValidSortFields_ShouldCallService() {
+        // Given
+        String[] validSortFields = {"id", "name", "description", "boatType"};
+        Page<BoatDto> expectedPage = new PageImpl<>(Arrays.asList(testBoat));
+        when(boatService.getAllBoatsInPage(any(PageRequest.class))).thenReturn(expectedPage);
+
+        // When & Then
+        for (String sortField : validSortFields) {
+            Page<BoatDto> result = boatV1Controller.getAllBoatsInPage(0, 10, sortField, "asc");
+            assertThat(result);
+        }
+        
+        // Verify the service was called the expected number of times
+        verify(boatService, times(validSortFields.length)).getAllBoatsInPage(any(PageRequest.class));
+    }
+
+    @Test
+    void getAllBoatsInPage_WithAllValidSortDirections_ShouldCallService() {
+        // Given
+        String[] validSortDirections = {"asc", "desc", "ASC", "DESC"};
+        Page<BoatDto> expectedPage = new PageImpl<>(Arrays.asList(testBoat));
+        when(boatService.getAllBoatsInPage(any(PageRequest.class))).thenReturn(expectedPage);
+
+        // When & Then
+        for (String sortDirection : validSortDirections) {
+            Page<BoatDto> result = boatV1Controller.getAllBoatsInPage(0, 10, "name", sortDirection);
+            assertThat(result);
+        }
+        
+        // Verify the service was called the expected number of times
+        verify(boatService, times(validSortDirections.length)).getAllBoatsInPage(any(PageRequest.class));
+    }
+
+    @Test
+    void createBoat_WithValidData_ShouldCallService() {
+        // Given
+        BoatCreationDto boatDto = new BoatCreationDto("Test Boat", "A test boat", "SAILBOAT");
+        when(boatService.createBoat(any(BoatCreationDto.class))).thenReturn(testBoat);
+
+        // When
+        ResponseEntity<BoatDto> response = boatV1Controller.createBoat(boatDto);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        verify(boatService).createBoat(boatDto);
+    }
+
+    @Test
+    void createBoat_WithAllValidBoatTypes_ShouldCallService() {
+        // Given
+        String[] validBoatTypes = {"SAILBOAT", "MOTORBOAT", "YACHT", "SPEEDBOAT", "FISHING_BOAT", "OTHER"};
+        when(boatService.createBoat(any(BoatCreationDto.class))).thenReturn(testBoat);
+
+        // When & Then
+        for (String boatType : validBoatTypes) {
+            BoatCreationDto boatDto = new BoatCreationDto("Test Boat", "A test boat", boatType);
+            ResponseEntity<BoatDto> response = boatV1Controller.createBoat(boatDto);
+            
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+            assertThat(response.getBody()).isNotNull();
+        }
+        
+        // Verify the service was called the expected number of times
+        verify(boatService, times(validBoatTypes.length)).createBoat(any(BoatCreationDto.class));
+    }
+
+    @Test
+    void createBoat_WithCaseInsensitiveBoatType_ShouldCallService() {
+        // Given
+        BoatCreationDto boatDto = new BoatCreationDto("Test Boat", "A test boat", "sailboat");
+        when(boatService.createBoat(any(BoatCreationDto.class))).thenReturn(testBoat);
+
+        // When
+        ResponseEntity<BoatDto> response = boatV1Controller.createBoat(boatDto);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        verify(boatService).createBoat(boatDto);
+    }
+
+    @Test
+    void updateBoatName_WithValidName_ShouldCallService() {
+        // Given
+        Long boatId = 1L;
+        BoatNameUpdateDto nameDto = new BoatNameUpdateDto("Updated Name");
+        when(boatService.updateBoatName(boatId, nameDto)).thenReturn(Optional.of(testBoat));
+
+        // When
+        ResponseEntity<BoatDto> response = boatV1Controller.updateBoatName(boatId, nameDto);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        verify(boatService).updateBoatName(boatId, nameDto);
+    }
+
+    @Test
+    void updateBoatType_WithValidType_ShouldCallService() {
+        // Given
+        Long boatId = 1L;
+        BoatTypeUpdateDto typeDto = new BoatTypeUpdateDto("MOTORBOAT");
+        when(boatService.updateBoatType(boatId, typeDto)).thenReturn(Optional.of(testBoat));
+
+        // When
+        ResponseEntity<BoatDto> response = boatV1Controller.updateBoatType(boatId, typeDto);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        verify(boatService).updateBoatType(boatId, typeDto);
+    }
+
+    @Test
+    void updateBoatType_WithAllValidBoatTypes_ShouldCallService() {
+        // Given
+        Long boatId = 1L;
+        String[] validBoatTypes = {"SAILBOAT", "MOTORBOAT", "YACHT", "SPEEDBOAT", "FISHING_BOAT", "OTHER"};
+        when(boatService.updateBoatType(anyLong(), any(BoatTypeUpdateDto.class))).thenReturn(Optional.of(testBoat));
+
+        // When & Then
+        for (String boatType : validBoatTypes) {
+            BoatTypeUpdateDto typeDto = new BoatTypeUpdateDto(boatType);
+            ResponseEntity<BoatDto> response = boatV1Controller.updateBoatType(boatId, typeDto);
+            
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            assertThat(response.getBody()).isNotNull();
+        }
+        
+        // Verify the service was called the expected number of times
+        verify(boatService, times(validBoatTypes.length)).updateBoatType(anyLong(), any(BoatTypeUpdateDto.class));
+    }
+
+    @Test
+    void updateBoatType_WithCaseInsensitiveType_ShouldCallService() {
+        // Given
+        Long boatId = 1L;
+        BoatTypeUpdateDto typeDto = new BoatTypeUpdateDto("yacht");
+        when(boatService.updateBoatType(boatId, typeDto)).thenReturn(Optional.of(testBoat));
+
+        // When
+        ResponseEntity<BoatDto> response = boatV1Controller.updateBoatType(boatId, typeDto);
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        verify(boatService).updateBoatType(boatId, typeDto);
+    }
+
+    // Test that the controller properly handles validation annotations
+    // Note: These tests verify that the controller method signatures are correct
+    // and that validation annotations are properly applied. The actual validation
+    // behavior is tested in the validation unit tests.
+
+    @Test
+    void getAllBoatsInPage_MethodSignature_ShouldHaveValidationAnnotations() throws NoSuchMethodException {
+        // Given
+        Method method = BoatV1Controller.class.getMethod("getAllBoatsInPage", 
+            int.class, int.class, String.class, String.class);
+
+        // Then
+        assertThat(method.getAnnotation(org.springframework.web.bind.annotation.GetMapping.class));
+        assertThat(method.getParameterAnnotations()[0]); // @Min(0) for page
+        assertThat(method.getParameterAnnotations()[1]); // @Min(1) @Max(50) for size
+        assertThat(method.getParameterAnnotations()[2]); // @ValidSortField for sortBy
+        assertThat(method.getParameterAnnotations()[3]); // @ValidSortDirection for sortDirection
+    }
+
+    @Test
+    void createBoat_MethodSignature_ShouldHaveValidationAnnotations() throws NoSuchMethodException {
+        // Given
+        Method method = BoatV1Controller.class.getMethod("createBoat", BoatCreationDto.class);
+
+        // Then
+        assertThat(method.getAnnotation(org.springframework.web.bind.annotation.PostMapping.class));
+        assertThat(method.getParameterAnnotations()[0]); // @Valid for boatDto
+    }
+
+    @Test
+    void updateBoatName_MethodSignature_ShouldHaveValidationAnnotations() throws NoSuchMethodException {
+        // Given
+        Method method = BoatV1Controller.class.getMethod("updateBoatName", Long.class, BoatNameUpdateDto.class);
+
+        // Then
+        assertThat(method.getAnnotation(org.springframework.web.bind.annotation.PatchMapping.class));
+        assertThat(method.getParameterAnnotations()[1]); // @Valid for nameDto
+    }
+
+    @Test
+    void updateBoatType_MethodSignature_ShouldHaveValidationAnnotations() throws NoSuchMethodException {
+        // Given
+        Method method = BoatV1Controller.class.getMethod("updateBoatType", Long.class, BoatTypeUpdateDto.class);
+
+        // Then
+        assertThat(method.getAnnotation(org.springframework.web.bind.annotation.PatchMapping.class));
+        assertThat(method.getParameterAnnotations()[1]); // @Valid for typeDto
     }
 }

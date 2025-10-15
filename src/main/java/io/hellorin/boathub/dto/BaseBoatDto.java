@@ -1,6 +1,5 @@
 package io.hellorin.boathub.dto;
 
-import io.hellorin.boathub.domain.BoatType;
 import io.hellorin.boathub.validation.ValidBoatType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

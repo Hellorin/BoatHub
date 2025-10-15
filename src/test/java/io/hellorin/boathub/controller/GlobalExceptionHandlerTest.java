@@ -8,7 +8,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test class for GlobalExceptionHandler to verify proper error handling.
@@ -29,11 +29,10 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponseDto> response = exceptionHandler.handleAllExceptions(ex, webRequest);
 
         // Then
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("An error occurred. Please try again later.", response.getBody().getMessage());
-        assertEquals("Internal Server Error", response.getBody().getError());
-        assertNotNull(response.getBody().getTimestamp());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("An error occurred. Please try again later.");
+        assertThat(response.getBody().getTimestamp()).isNotNull();
     }
 
     @Test
@@ -48,10 +47,9 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponseDto> response = exceptionHandler.handleAllExceptions(ex, webRequest);
 
         // Then
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("An error occurred. Please try again later.", response.getBody().getMessage());
-        assertEquals("Internal Server Error", response.getBody().getError());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("An error occurred. Please try again later.");
     }
 
     @Test
@@ -66,9 +64,8 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ErrorResponseDto> response = exceptionHandler.handleAllExceptions(ex, webRequest);
 
         // Then
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("An error occurred. Please try again later.", response.getBody().getMessage());
-        assertEquals("Internal Server Error", response.getBody().getError());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("An error occurred. Please try again later.");
     }
 }
