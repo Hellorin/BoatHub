@@ -47,7 +47,11 @@ public class BoatV1Controller {
         summary = "Get all boats in page",
         description = "Retrieves a paginated list of all boats in the system. Supports pagination parameters: page (0-based), size, sortBy (id, name, description, boatType), and sortDirection (asc, desc)."
     )
-    @ApiResponse(responseCode = "200", description = "Page of boats retrieved successfully")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Page of boats retrieved successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid pageable data provided")
+    })
+
     @GetMapping(produces = "application/json")
     @ResponseStatus(HttpStatus.OK)
     public Page<BoatDto> getAllBoatsInPage(
@@ -61,8 +65,8 @@ public class BoatV1Controller {
             @ValidSortDirection @RequestParam(name = "sortDirection", defaultValue = "asc", required = false) String sortDirection) {
         
         // Create sort direction
-        Sort.Direction direction = parseSortDirection(sortDirection);
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        var direction = parseSortDirection(sortDirection);
+        var pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
         return boatService.getAllBoatsInPage(pageRequest);
     }
@@ -97,7 +101,7 @@ public class BoatV1Controller {
     public ResponseEntity<BoatDto> getBoatById(
             @Parameter(description = "Unique identifier of the boat", example = "1")
             @PathVariable("id") Long id) {
-        Optional<BoatDto> boat = boatService.getBoatById(id);
+        var boat = boatService.getBoatById(id);
         
         return boat.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -121,7 +125,7 @@ public class BoatV1Controller {
     public ResponseEntity<BoatDto> createBoat(
             @Parameter(description = "Boat data to create")
             @Valid @RequestBody BoatCreationDto boatCreationDto) {
-        BoatDto createdBoat = boatService.createBoat(boatCreationDto);
+        var createdBoat = boatService.createBoat(boatCreationDto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .location(java.net.URI.create("/api/v1/boats/" + createdBoat.getId()))
@@ -150,7 +154,7 @@ public class BoatV1Controller {
             @PathVariable("id") Long id,
             @Parameter(description = "New boat name")
             @Valid @RequestBody BoatNameUpdateDto boatNameUpdateDto) {
-        Optional<BoatDto> updatedBoat = boatService.updateBoatName(id, boatNameUpdateDto);
+        var updatedBoat = boatService.updateBoatName(id, boatNameUpdateDto);
         
         return updatedBoat.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -177,7 +181,7 @@ public class BoatV1Controller {
             @PathVariable("id") Long id,
             @Parameter(description = "New boat description")
             @Valid @RequestBody BoatDescriptionUpdateDto boatDescriptionUpdateDto) {
-        Optional<BoatDto> updatedBoat = boatService.updateBoatDescription(id, boatDescriptionUpdateDto);
+        var updatedBoat = boatService.updateBoatDescription(id, boatDescriptionUpdateDto);
         
         return updatedBoat.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -204,7 +208,7 @@ public class BoatV1Controller {
             @PathVariable("id") Long id,
             @Parameter(description = "New boat type")
             @Valid @RequestBody BoatTypeUpdateDto boatTypeUpdateDto) {
-        Optional<BoatDto> updatedBoat = boatService.updateBoatType(id, boatTypeUpdateDto);
+        var updatedBoat = boatService.updateBoatType(id, boatTypeUpdateDto);
         
         return updatedBoat.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -227,7 +231,7 @@ public class BoatV1Controller {
     public ResponseEntity<Void> deleteBoat(
             @Parameter(description = "Unique identifier of the boat to delete", example = "1")
             @PathVariable("id") Long id) {
-        boolean deleted = boatService.deleteBoat(id);
+        var deleted = boatService.deleteBoat(id);
         
         return deleted ? ResponseEntity.noContent().build() 
                       : ResponseEntity.notFound().build();

@@ -67,7 +67,7 @@ class BoatServiceTest {
         testBoatDto.setId(1L);
         testBoatDto.setName("Test Boat");
         testBoatDto.setDescription("A test boat for unit testing");
-        testBoatDto.setBoatType(BoatType.SAILBOAT);
+        testBoatDto.setBoatType(BoatType.SAILBOAT.name());
         testBoatDto.setCreatedDate(testDateTime);
         testBoatDto.setUpdatedDate(testDateTime);
     }
@@ -87,7 +87,7 @@ class BoatServiceTest {
         boatDto2.setId(2L);
         boatDto2.setName("Another Boat");
         boatDto2.setDescription("Another test boat");
-        boatDto2.setBoatType(BoatType.MOTORBOAT);
+        boatDto2.setBoatType(BoatType.MOTORBOAT.name());
         boatDto2.setCreatedDate(testDateTime);
         boatDto2.setUpdatedDate(testDateTime);
 
@@ -253,7 +253,7 @@ class BoatServiceTest {
         fishingBoatDto.setId(2L);
         fishingBoatDto.setName("Fishing Vessel");
         fishingBoatDto.setDescription("A boat for fishing");
-        fishingBoatDto.setBoatType(BoatType.FISHING_BOAT);
+        fishingBoatDto.setBoatType(BoatType.FISHING_BOAT.name());
         fishingBoatDto.setCreatedDate(testDateTime);
         fishingBoatDto.setUpdatedDate(testDateTime);
 
@@ -266,7 +266,7 @@ class BoatServiceTest {
 
         // Then
         assertThat(result).isPresent().contains(fishingBoatDto);
-        assertThat(result.get().getBoatType()).isEqualTo(BoatType.FISHING_BOAT);
+        assertThat(result.get().getBoatType()).isEqualTo(BoatType.FISHING_BOAT.name());
         
         verify(boatRepository).findById(boatId);
         verify(boatMapper).toDto(fishingBoatEntity);
@@ -287,7 +287,7 @@ class BoatServiceTest {
         yachtDto.setId(3L);
         yachtDto.setName("Luxury Yacht");
         yachtDto.setDescription("A luxurious yacht");
-        yachtDto.setBoatType(BoatType.YACHT);
+        yachtDto.setBoatType(BoatType.YACHT.name());
         yachtDto.setCreatedDate(testDateTime);
         yachtDto.setUpdatedDate(testDateTime);
 
@@ -311,6 +311,7 @@ class BoatServiceTest {
         // Verify all boat types are present
         List<BoatType> boatTypes = result.getContent().stream()
                 .map(BoatDto::getBoatType)
+                .map(BoatType::valueOf)
                 .toList();
         assertThat(boatTypes).contains(BoatType.SAILBOAT).contains(BoatType.YACHT);
         
@@ -338,7 +339,7 @@ class BoatServiceTest {
         updatedDto.setId(1L);
         updatedDto.setName(newName);
         updatedDto.setDescription("A test boat for unit testing");
-        updatedDto.setBoatType(BoatType.SAILBOAT);
+        updatedDto.setBoatType(BoatType.SAILBOAT.name());
         updatedDto.setCreatedDate(testDateTime);
         updatedDto.setUpdatedDate(testDateTime.plusHours(1));
 
@@ -395,7 +396,7 @@ class BoatServiceTest {
         updatedDto.setId(1L);
         updatedDto.setName("Test Boat");
         updatedDto.setDescription(newDescription);
-        updatedDto.setBoatType(BoatType.SAILBOAT);
+        updatedDto.setBoatType(BoatType.SAILBOAT.name());
         updatedDto.setCreatedDate(testDateTime);
         updatedDto.setUpdatedDate(testDateTime.plusHours(1));
 
@@ -452,7 +453,7 @@ class BoatServiceTest {
         updatedDto.setId(1L);
         updatedDto.setName("Test Boat");
         updatedDto.setDescription("A test boat for unit testing");
-        updatedDto.setBoatType(newType);
+        updatedDto.setBoatType(newType.name());
         updatedDto.setCreatedDate(testDateTime);
         updatedDto.setUpdatedDate(testDateTime.plusHours(1));
 
@@ -465,7 +466,7 @@ class BoatServiceTest {
 
         // Then
         assertThat(result).contains(updatedDto);
-        assertThat(result.get().getBoatType()).isEqualTo(newType);
+        assertThat(result.get().getBoatType()).isEqualTo(newType.name());
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository).save(any(BoatEntity.class));
@@ -559,7 +560,7 @@ class BoatServiceTest {
         expectedDto.setId(1L);
         expectedDto.setName("New Boat");
         expectedDto.setDescription("A new test boat");
-        expectedDto.setBoatType(BoatType.SAILBOAT);
+        expectedDto.setBoatType(BoatType.SAILBOAT.name());
         expectedDto.setCreatedDate(testDateTime);
         expectedDto.setUpdatedDate(testDateTime);
 
@@ -575,7 +576,7 @@ class BoatServiceTest {
         assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getName()).isEqualTo("New Boat");
         assertThat(result.getDescription()).isEqualTo("A new test boat");
-        assertThat(result.getBoatType()).isEqualTo(BoatType.SAILBOAT);
+        assertThat(result.getBoatType()).isEqualTo(BoatType.SAILBOAT.name());
         
         verify(boatMapper).toEntity(creationDto);
         verify(boatRepository).save(any(BoatEntity.class));
@@ -606,7 +607,7 @@ class BoatServiceTest {
         expectedDto.setId(2L);
         expectedDto.setName("Motor Boat");
         expectedDto.setDescription("A motor boat");
-        expectedDto.setBoatType(BoatType.MOTORBOAT);
+        expectedDto.setBoatType(BoatType.MOTORBOAT.name());
         expectedDto.setCreatedDate(testDateTime);
         expectedDto.setUpdatedDate(testDateTime);
 
@@ -619,7 +620,7 @@ class BoatServiceTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getBoatType()).isEqualTo(BoatType.MOTORBOAT);
+        assertThat(result.getBoatType()).isEqualTo(BoatType.MOTORBOAT.name());
         assertThat(result.getName()).isEqualTo("Motor Boat");
         
         verify(boatMapper).toEntity(creationDto);
@@ -780,7 +781,7 @@ class BoatServiceTest {
         updatedDto.setId(1L);
         updatedDto.setName("Test Boat");
         updatedDto.setDescription("A test boat for unit testing");
-        updatedDto.setBoatType(BoatType.MOTORBOAT);
+        updatedDto.setBoatType(BoatType.MOTORBOAT.name());
         updatedDto.setCreatedDate(testDateTime);
         updatedDto.setUpdatedDate(testDateTime.plusHours(1));
 
@@ -793,7 +794,7 @@ class BoatServiceTest {
 
         // Then
         assertThat(result).isPresent();
-        assertThat(result.get().getBoatType()).isEqualTo(BoatType.MOTORBOAT);
+        assertThat(result.get().getBoatType()).isEqualTo(BoatType.MOTORBOAT.name());
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository).save(any(BoatEntity.class));
@@ -818,7 +819,7 @@ class BoatServiceTest {
         updatedDto.setId(1L);
         updatedDto.setName("Test Boat");
         updatedDto.setDescription("A test boat for unit testing");
-        updatedDto.setBoatType(BoatType.FISHING_BOAT);
+        updatedDto.setBoatType(BoatType.FISHING_BOAT.name());
         updatedDto.setCreatedDate(testDateTime);
         updatedDto.setUpdatedDate(testDateTime.plusHours(1));
 
@@ -831,7 +832,7 @@ class BoatServiceTest {
 
         // Then
         assertThat(result).isPresent();
-        assertThat(result.get().getBoatType()).isEqualTo(BoatType.FISHING_BOAT);
+        assertThat(result.get().getBoatType()).isEqualTo(BoatType.FISHING_BOAT.name());
         
         verify(boatRepository).findById(boatId);
         verify(boatRepository).save(any(BoatEntity.class));

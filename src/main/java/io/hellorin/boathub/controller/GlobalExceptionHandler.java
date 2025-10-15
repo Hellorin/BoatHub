@@ -24,13 +24,13 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(IllegalArgumentException ex) {
-        logger.warn("An error occurred while trying to process the request", ex);
+        LOGGER.warn("An error occurred while trying to process the request", ex);
 
-        ErrorResponseDto errorResponse = new ErrorResponseDto(
+        var errorResponse = new ErrorResponseDto(
                 "The input is invalid: " + ex.getMessage()
         );
 
@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDto> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-        logger.warn("Validation failed for request body", ex);
+        LOGGER.warn("Validation failed for request body", ex);
 
         String validationErrors = ex.getBindingResult()
                 .getFieldErrors()
@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining(", "));
 
-        ErrorResponseDto errorResponse = new ErrorResponseDto(
+        var errorResponse = new ErrorResponseDto(
                 "'Validation failed':\n " + validationErrors
         );
 
@@ -68,14 +68,14 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponseDto> handleConstraintViolationException(ConstraintViolationException ex) {
-        logger.warn("Validation failed for method parameters", ex);
+        LOGGER.warn("Validation failed for method parameters", ex);
 
         String validationErrors = ex.getConstraintViolations()
                 .stream()
                 .map(ConstraintViolation::getMessage)
                 .collect(Collectors.joining(", "));
 
-        ErrorResponseDto errorResponse = new ErrorResponseDto(
+        var errorResponse = new ErrorResponseDto(
                 "Validation failed: " + validationErrors
         );
 
@@ -90,9 +90,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ErrorResponseDto> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex) {
-        logger.warn("HTTP method not supported: {}", ex.getMessage());
+        LOGGER.warn("HTTP method not supported: {}", ex.getMessage());
 
-        ErrorResponseDto errorResponse = new ErrorResponseDto(
+        var errorResponse = new ErrorResponseDto(
                 "HTTP method '" + ex.getMethod() + "' is not supported for this endpoint"
         );
 
@@ -107,9 +107,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     public ResponseEntity<ErrorResponseDto> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException ex) {
-        logger.warn("Unsupported media type: {}", ex.getMessage());
+        LOGGER.warn("Unsupported media type: {}", ex.getMessage());
 
-        ErrorResponseDto errorResponse = new ErrorResponseDto(
+        var errorResponse = new ErrorResponseDto(
                 "Content-Type '" + ex.getContentType() + "' is not supported"
         );
 
@@ -124,9 +124,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponseDto> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        logger.warn("HTTP message not readable: {}", ex.getMessage());
+        LOGGER.warn("HTTP message not readable: {}", ex.getMessage());
 
-        ErrorResponseDto errorResponse = new ErrorResponseDto(
+        var errorResponse = new ErrorResponseDto(
                 "Invalid request body format"
         );
 
@@ -141,9 +141,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(TypeMismatchException.class)
     public ResponseEntity<ErrorResponseDto> handleTypeMismatchException(TypeMismatchException ex) {
-        logger.warn("Type mismatch: {}", ex.getMessage());
+        LOGGER.warn("Type mismatch: {}", ex.getMessage());
 
-        ErrorResponseDto errorResponse = new ErrorResponseDto(
+        var errorResponse = new ErrorResponseDto(
                 "Invalid parameter type for '" + ex.getPropertyName() + "': expected " + ex.getRequiredType().getSimpleName()
         );
 
@@ -159,9 +159,9 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleAllExceptions(Exception ex, WebRequest request) {
-        logger.error("An error occurred: {}", ex.getMessage(), ex);
+        LOGGER.error("An error occurred: {}", ex.getMessage(), ex);
         
-        ErrorResponseDto errorResponse = new ErrorResponseDto(
+        var errorResponse = new ErrorResponseDto(
             "An error occurred. Please try again later."
         );
         

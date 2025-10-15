@@ -57,9 +57,9 @@ public class BoatService {
      * @return The created boat DTO with generated ID and timestamps
      */
     public BoatDto createBoat(BoatCreationDto boatCreationDto) {
-        BoatEntity boatEntity = boatMapper.toEntity(boatCreationDto);
+        var boatEntity = boatMapper.toEntity(boatCreationDto);
 
-        BoatEntity savedEntity = boatRepository.save(boatEntity);
+        var savedEntity = boatRepository.save(boatEntity);
         return boatMapper.toDto(savedEntity);
     }
 

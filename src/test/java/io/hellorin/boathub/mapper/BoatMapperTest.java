@@ -33,7 +33,7 @@ class BoatMapperTest {
         boatDto.setId(1L);
         boatDto.setName("The Black Pearl");
         boatDto.setDescription("A legendary pirate ship");
-        boatDto.setBoatType(BoatType.SAILBOAT);
+        boatDto.setBoatType(BoatType.SAILBOAT.name());
         boatDto.setCreatedDate(testDateTime);
         boatDto.setUpdatedDate(testDateTime.plusHours(1));
 
@@ -45,7 +45,7 @@ class BoatMapperTest {
         assertThat(result.getId()).isEqualTo(boatDto.getId());
         assertThat(result.getName()).isEqualTo(boatDto.getName());
         assertThat(result.getDescription()).isEqualTo(boatDto.getDescription());
-        assertThat(result.getBoatType()).isEqualTo(boatDto.getBoatType());
+        assertThat(result.getBoatType().name()).isEqualTo(boatDto.getBoatType());
         assertThat(result.getCreatedDate()).isEqualTo(boatDto.getCreatedDate());
         assertThat(result.getUpdatedDate()).isEqualTo(boatDto.getUpdatedDate());
     }
@@ -69,7 +69,7 @@ class BoatMapperTest {
         assertThat(result.getId()).isEqualTo(boatEntity.getId());
         assertThat(result.getName()).isEqualTo(boatEntity.getName());
         assertThat(result.getDescription()).isEqualTo(boatEntity.getDescription());
-        assertThat(result.getBoatType()).isEqualTo(boatEntity.getBoatType());
+        assertThat(result.getBoatType()).isEqualTo(boatEntity.getBoatType().name());
         assertThat(result.getCreatedDate()).isEqualTo(boatEntity.getCreatedDate());
         assertThat(result.getUpdatedDate()).isEqualTo(boatEntity.getUpdatedDate());
     }
@@ -80,7 +80,7 @@ class BoatMapperTest {
         BoatDto boatDto = new BoatDto();
         boatDto.setId(3L);
         boatDto.setName("Minimal Boat");
-        boatDto.setBoatType(BoatType.MOTORBOAT);
+        boatDto.setBoatType(BoatType.MOTORBOAT.name());
         // description, createdDate, updatedDate are null
 
         // When
@@ -91,7 +91,7 @@ class BoatMapperTest {
         assertThat(result.getId()).isEqualTo(boatDto.getId());
         assertThat(result.getName()).isEqualTo(boatDto.getName());
         assertThat(result.getDescription()).isNull();
-        assertThat(result.getBoatType()).isEqualTo(boatDto.getBoatType());
+        assertThat(result.getBoatType().name()).isEqualTo(boatDto.getBoatType());
         assertThat(result.getCreatedDate()).isNull();
         assertThat(result.getUpdatedDate()).isNull();
     }
@@ -113,7 +113,7 @@ class BoatMapperTest {
         assertThat(result.getId()).isEqualTo(boatEntity.getId());
         assertThat(result.getName()).isEqualTo(boatEntity.getName());
         assertThat(result.getDescription()).isNull();
-        assertThat(result.getBoatType()).isEqualTo(boatEntity.getBoatType());
+        assertThat(result.getBoatType()).isEqualTo(boatEntity.getBoatType().name());
         assertThat(result.getCreatedDate()).isNull();
         assertThat(result.getUpdatedDate()).isNull();
     }
@@ -124,7 +124,7 @@ class BoatMapperTest {
         for (BoatType boatType : BoatType.values()) {
             BoatDto boatDto = new BoatDto();
             boatDto.setName("Test " + boatType.getDisplayName());
-            boatDto.setBoatType(boatType);
+            boatDto.setBoatType(boatType.name());
 
             // When
             BoatEntity result = boatMapper.toEntity(boatDto);
@@ -149,7 +149,7 @@ class BoatMapperTest {
 
             // Then
             assertThat(result).isNotNull();
-            assertThat(result.getBoatType()).isEqualTo(boatType);
+            assertThat(result.getBoatType()).isEqualTo(boatType.name());
             assertThat(result.getName()).isEqualTo("Test " + boatType.getDisplayName());
         }
     }
@@ -160,7 +160,7 @@ class BoatMapperTest {
         BoatDto boatDto = new BoatDto();
         boatDto.setName("");
         boatDto.setDescription("");
-        boatDto.setBoatType(BoatType.OTHER);
+        boatDto.setBoatType(BoatType.OTHER.name());
 
         // When
         BoatEntity result = boatMapper.toEntity(boatDto);
@@ -187,6 +187,6 @@ class BoatMapperTest {
         assertThat(result).isNotNull();
         assertThat(result.getName()).isEmpty();
         assertThat(result.getDescription()).isEmpty();
-        assertThat(result.getBoatType()).isEqualTo(BoatType.OTHER);
+        assertThat(result.getBoatType()).isEqualTo(BoatType.OTHER.name());
     }
 }

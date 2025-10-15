@@ -54,7 +54,7 @@ class BoatV1ControllerSliceTest {
         boat.setId(1L);
         boat.setName("Test Boat");
         boat.setDescription("A test boat");
-        boat.setBoatType(BoatType.SAILBOAT);
+        boat.setBoatType(BoatType.SAILBOAT.name());
         boat.setCreatedDate(LocalDateTime.now());
         boat.setUpdatedDate(LocalDateTime.now());
         return boat;
@@ -331,7 +331,7 @@ class BoatV1ControllerSliceTest {
         // Given
         BoatTypeUpdateDto typeUpdateDto = new BoatTypeUpdateDto("MOTORBOAT");
         BoatDto updatedBoat = createTestBoat();
-        updatedBoat.setBoatType(BoatType.MOTORBOAT);
+        updatedBoat.setBoatType(BoatType.MOTORBOAT.name());
         when(boatService.updateBoatType(any(Long.class), any(BoatTypeUpdateDto.class))).thenReturn(Optional.of(updatedBoat));
 
         // When & Then

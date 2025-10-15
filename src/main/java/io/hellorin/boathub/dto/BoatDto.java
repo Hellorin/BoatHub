@@ -10,19 +10,9 @@ import java.time.LocalDateTime;
  * Data Transfer Object for BoatEntity.
  * Used for API communication and data validation.
  */
-public class BoatDto {
+public class BoatDto extends BaseBoatDto {
     
     private Long id;
-    
-    @NotBlank(message = "Boat name is required")
-    @Size(max = 100, message = "Boat name must not exceed 100 characters")
-    private String name;
-    
-    @Size(max = 500, message = "Description must not exceed 500 characters")
-    private String description;
-    
-    @NotNull(message = "Boat type is required")
-    private BoatType boatType;
     
     private LocalDateTime createdDate;
     
@@ -43,12 +33,10 @@ public class BoatDto {
      * @param createdDate The creation date
      * @param updatedDate The last update date
      */
-    public BoatDto(Long id, String name, String description, BoatType boatType,
+    public BoatDto(Long id, String name, String description, String boatType,
                    LocalDateTime createdDate, LocalDateTime updatedDate) {
+        super(name, description, boatType);
         this.id = id;
-        this.name = name;
-        this.description = description;
-        this.boatType = boatType;
         this.createdDate = createdDate;
         this.updatedDate = updatedDate;
     }
@@ -59,30 +47,6 @@ public class BoatDto {
     
     public void setId(Long id) {
         this.id = id;
-    }
-    
-    public String getName() {
-        return name;
-    }
-    
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-    public String getDescription() {
-        return description;
-    }
-    
-    public void setDescription(String description) {
-        this.description = description;
-    }
-    
-    public BoatType getBoatType() {
-        return boatType;
-    }
-    
-    public void setBoatType(BoatType boatType) {
-        this.boatType = boatType;
     }
     
     public LocalDateTime getCreatedDate() {

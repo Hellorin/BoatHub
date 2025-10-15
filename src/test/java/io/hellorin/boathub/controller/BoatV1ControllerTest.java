@@ -83,7 +83,7 @@ class BoatV1ControllerTest {
         updatedBoat.setId(1L);
         updatedBoat.setName("Test Boat");
         updatedBoat.setDescription("A test boat");
-        updatedBoat.setBoatType(BoatType.MOTORBOAT);
+        updatedBoat.setBoatType(BoatType.MOTORBOAT.name());
         
         when(boatService.updateBoatType(boatId, typeUpdateDto)).thenReturn(Optional.of(updatedBoat));
 
@@ -93,7 +93,7 @@ class BoatV1ControllerTest {
         // Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getBoatType()).isEqualTo(BoatType.MOTORBOAT);
+        assertThat(response.getBody().getBoatType()).isEqualTo(BoatType.MOTORBOAT.name());
         verify(boatService).updateBoatType(boatId, typeUpdateDto);
     }
 
@@ -189,7 +189,7 @@ class BoatV1ControllerTest {
         createdBoat.setId(2L);
         createdBoat.setName("New Boat");
         createdBoat.setDescription("A new boat");
-        createdBoat.setBoatType(BoatType.SAILBOAT);
+        createdBoat.setBoatType(BoatType.SAILBOAT.name());
         
         when(boatService.createBoat(creationDto)).thenReturn(createdBoat);
 
