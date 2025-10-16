@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Profile("dev") // We don't want to run this in stage or production
-public class UserDataInitializer implements CommandLineRunner {
+public class DevUserDataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserDataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public DevUserDataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }

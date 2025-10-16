@@ -32,8 +32,6 @@ export class ApiError extends Error {
   }
 }
 
-// CSRF token handling is now managed by csrfService
-
 /**
  * Generic API request function with error handling
  */
