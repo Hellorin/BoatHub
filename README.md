@@ -78,6 +78,7 @@ The application will be available at `http://localhost:8080` with:
 - Frontend: `http://localhost:8080/`
 - API Documentation: `http://localhost:8080/swagger-ui.html`
 - Health Check: `http://localhost:8080/actuator/health`
+- Prometheus Metrics: `http://localhost:8080/actuator/prometheus`
 
 ## Testing Data (on dev profile)
 
@@ -119,7 +120,7 @@ Here are the identified areas for future development:
 - **Rate Limiting**: Add rate limiting to API endpoints to prevent abuse and ensure fair usage
 
 ### Potential Future Improvements
-- **Session peristance**: Use a cache to persist the session to avoid the users to have to log in after an application restart
+- **Session persistence**: Use a cache to persist the session to avoid the users to have to log in after an application restart
 
 - **Database Indexing**: Review and add database indexes as the application scales
 
