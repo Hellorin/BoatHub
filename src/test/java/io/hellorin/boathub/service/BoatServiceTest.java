@@ -223,7 +223,7 @@ class BoatServiceTest {
     @Test
     void getAllBoats_InPage_WhenMapperReturnsNull_ShouldHandleGracefully() {
         // Given
-        Page<BoatEntity> boatEntityPage = new PageImpl<>(Arrays.asList(testBoatEntity));
+        Page<BoatEntity> boatEntityPage = new PageImpl<>(List.of(testBoatEntity));
         Pageable pageable = PageRequest.of(0, 10);
         when(boatRepository.findAll(pageable)).thenReturn(boatEntityPage);
         when(boatMapper.toDto(testBoatEntity)).thenReturn(null);

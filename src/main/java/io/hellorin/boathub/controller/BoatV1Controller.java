@@ -20,7 +20,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
-import java.util.Optional;
 
 /**
  * REST controller for boat-related API endpoints.
@@ -153,7 +152,7 @@ public class BoatV1Controller {
             @PathVariable("id") Long id,
             @Parameter(description = "Boat data to update")
             @Valid @RequestBody BoatUpdateDto boatUpdateDto) {
-        Optional<BoatDto> updatedBoat = boatService.updateBoat(id, boatUpdateDto);
+        var updatedBoat = boatService.updateBoat(id, boatUpdateDto);
         
         return updatedBoat.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

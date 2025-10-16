@@ -1,15 +1,16 @@
 package io.hellorin.boathub.mapper;
 
 import io.hellorin.boathub.domain.BoatEntity;
-import io.hellorin.boathub.dto.BaseBoatDto;
+import io.hellorin.boathub.dto.BoatCreationDto;
 import io.hellorin.boathub.dto.BoatDto;
 import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 
 /**
  * MapStruct mapper for converting between BoatEntity and BoatEntityDto.
  * This mapper is configured as a Spring component for dependency injection.
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface BoatMapper {
 
     /**
@@ -21,19 +22,10 @@ public interface BoatMapper {
     BoatDto toDto(BoatEntity boatEntity);
 
     /**
-     * Maps a BoatEntityDto to a BoatEntity.
+     * Maps a BoatCreationDto to a BoatEntity.
      *
-     * @param boatDto the source DTO
+     * @param boatCreationDto the source base DTO
      * @return the mapped entity
      */
-    BoatEntity toEntity(BoatDto boatDto);
-
-    /**
-     * Maps a BaseBoatDto to a BoatEntity.
-     * This method will be used by both BoatCreationDto and BoatUpdateDto.
-     *
-     * @param baseBoatDto the source base DTO
-     * @return the mapped entity
-     */
-    BoatEntity toEntity(BaseBoatDto baseBoatDto);
+    BoatEntity toEntity(BoatCreationDto boatCreationDto);
 }

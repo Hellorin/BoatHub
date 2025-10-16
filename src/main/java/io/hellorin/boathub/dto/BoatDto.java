@@ -13,22 +13,10 @@ public class BoatDto extends BaseBoatDto {
     private LocalDateTime createdDate;
     
     private LocalDateTime updatedDate;
-    
-    /**
-     * Default constructor.
-     */
+
     public BoatDto() {
     }
-    
-    /**
-     * Constructor with all fields.
-     * @param id The boat ID
-     * @param name The boat name
-     * @param description The boat description
-     * @param boatType The boat type
-     * @param createdDate The creation date
-     * @param updatedDate The last update date
-     */
+
     public BoatDto(Long id, String name, String description, String boatType,
                    LocalDateTime createdDate, LocalDateTime updatedDate) {
         super(name, description, boatType);

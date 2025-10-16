@@ -17,9 +17,8 @@ public class ValidBoatTypeValidator implements ConstraintValidator<ValidBoatType
     
     @Override
     public boolean isValid(String boatType, ConstraintValidatorContext context) {
-        // Null and empty values are handled by @NotBlank annotation
         if (boatType == null || boatType.trim().isEmpty()) {
-            return true;
+            return true; // Null and empty values are handled by @NotBlank annotation
         }
         
         // Check if the string represents a valid boat type enum value

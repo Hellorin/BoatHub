@@ -12,17 +12,10 @@ public class BoatTypeUpdateDto {
     @NotBlank(message = "Boat type is required")
     @ValidBoatType
     private String boatType;
-    
-    /**
-     * Default constructor.
-     */
+
     public BoatTypeUpdateDto() {
     }
-    
-    /**
-     * Constructor with boatType field.
-     * @param boatType The boat type as string
-     */
+
     public BoatTypeUpdateDto(String boatType) {
         this.boatType = boatType;
     }

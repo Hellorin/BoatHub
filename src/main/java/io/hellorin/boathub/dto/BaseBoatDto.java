@@ -21,19 +21,10 @@ public abstract class BaseBoatDto {
     @NotNull(message = "Boat type is required")
     @ValidBoatType
     private String boatType;
-    
-    /**
-     * Default constructor.
-     */
+
     protected BaseBoatDto() {
     }
-    
-    /**
-     * Constructor with all fields.
-     * @param name The boat name
-     * @param description The boat description
-     * @param boatType The boat type
-     */
+
     protected BaseBoatDto(String name, String description, String boatType) {
         this.name = name;
         this.description = description;

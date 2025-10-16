@@ -20,7 +20,6 @@ import org.springframework.security.web.header.writers.StaticHeadersWriter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Security configuration for the application.
@@ -34,7 +33,7 @@ public class SecurityConfig {
     private final StaticHeadersWriter cspWriter;
 
     public SecurityConfig(UserDetailsServiceImpl userDetailsService, 
-                         @Autowired(required = false) StaticHeadersWriter cspWriter) {
+                         StaticHeadersWriter cspWriter) {
         this.userDetailsService = userDetailsService;
         this.cspWriter = cspWriter;
     }
@@ -48,7 +47,7 @@ public class SecurityConfig {
      * @throws Exception if configuration fails
      */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, StaticHeadersWriter staticHeadersWriter) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // Configure CSRF token request handler for SPA compatibility
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
         // Disable the requirement for the header "X-Requested-With" to allow AJAX requests

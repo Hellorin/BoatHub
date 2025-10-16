@@ -157,8 +157,6 @@ class AuthControllerTest {
     @Test
     void getCurrentUser_WhenUserIsAuthenticated_ShouldReturnUserDto() {
         // Given
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
         when(userDetails.getUsername()).thenReturn(TEST_USERNAME);
         SecurityContextHolder.setContext(securityContext);
 
@@ -176,9 +174,6 @@ class AuthControllerTest {
 
     @Test
     void getCurrentUser_WhenUserIsNotAuthenticated_ShouldReturnUnauthorized() {
-        // Given
-        when(securityContext.getAuthentication()).thenReturn(null);
-        SecurityContextHolder.setContext(securityContext);
 
         // When
         ResponseEntity<Object> result = authController.getCurrentUser(userDetails);
@@ -191,8 +186,6 @@ class AuthControllerTest {
     @Test
     void getCurrentUser_WhenAuthenticationIsNotAuthenticated_ShouldReturnUnauthorized() {
         // Given
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(false);
         SecurityContextHolder.setContext(securityContext);
 
         // When
@@ -206,8 +199,6 @@ class AuthControllerTest {
     @Test
     void getCurrentUser_WhenUserDetailsIsNull_ShouldReturnUnauthorized() {
         // Given
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
         SecurityContextHolder.setContext(securityContext);
 
         // When
@@ -221,8 +212,6 @@ class AuthControllerTest {
     @Test
     void getCurrentUser_WhenUsernameIsNull_ShouldReturnUnauthorized() {
         // Given
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
         when(userDetails.getUsername()).thenReturn(null);
         SecurityContextHolder.setContext(securityContext);
 
@@ -237,8 +226,6 @@ class AuthControllerTest {
     @Test
     void getCurrentUser_WhenUsernameIsAnonymousUser_ShouldReturnUnauthorized() {
         // Given
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
         when(userDetails.getUsername()).thenReturn("anonymousUser");
         SecurityContextHolder.setContext(securityContext);
 
@@ -253,8 +240,6 @@ class AuthControllerTest {
     @Test
     void getCurrentUser_WhenUsernameIsAnonymousUserCaseInsensitive_ShouldReturnUnauthorized() {
         // Given
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.isAuthenticated()).thenReturn(true);
         when(userDetails.getUsername()).thenReturn("ANONYMOUSUSER");
         SecurityContextHolder.setContext(securityContext);
 

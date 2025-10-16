@@ -10,17 +10,10 @@ public class BoatDescriptionUpdateDto {
     
     @Size(max = 500, message = "Description must not exceed 500 characters")
     private String description;
-    
-    /**
-     * Default constructor.
-     */
+
     public BoatDescriptionUpdateDto() {
     }
-    
-    /**
-     * Constructor with description field.
-     * @param description The boat description
-     */
+
     public BoatDescriptionUpdateDto(String description) {
         this.description = description;
     }

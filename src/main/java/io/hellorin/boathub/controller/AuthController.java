@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -41,7 +40,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Object> login(@Valid @RequestBody LoginRequestDto loginRequest, HttpServletRequest request) {
         try {
-            Authentication authentication = authenticationManager.authenticate(
+            var authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                     loginRequest.getUsername(),
                     loginRequest.getPassword()
@@ -52,7 +51,7 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             request.getSession().setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
             
-            UserDto userDto = new UserDto(loginRequest.getUsername(), true);
+            var userDto = new UserDto(loginRequest.getUsername(), true);
             return ResponseEntity.ok(userDto);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -70,7 +69,7 @@ public class AuthController {
      */
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             new SecurityContextLogoutHandler().logout(request, response, authentication);
         }
@@ -85,11 +84,7 @@ public class AuthController {
      */
     @GetMapping("/user")
     public ResponseEntity<Object> getCurrentUser(@AuthenticationPrincipal UserDetails user) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
-
-        if (authentication != null && authentication.isAuthenticated()
-                && user != null && user.getUsername() != null
+        if (user != null && user.getUsername() != null
                 && !"anonymousUser".equalsIgnoreCase(user.getUsername())) {
             UserDto userDto = new UserDto(user.getUsername(), true);
             return ResponseEntity.ok(userDto);

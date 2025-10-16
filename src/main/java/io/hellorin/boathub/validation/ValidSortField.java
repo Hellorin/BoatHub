@@ -15,6 +15,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidSortField {
     String message() default "Invalid sortBy field. Allowed values are: id, name, description, boatType";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

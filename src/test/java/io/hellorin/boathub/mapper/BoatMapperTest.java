@@ -2,6 +2,7 @@ package io.hellorin.boathub.mapper;
 
 import io.hellorin.boathub.domain.BoatEntity;
 import io.hellorin.boathub.domain.BoatType;
+import io.hellorin.boathub.dto.BoatCreationDto;
 import io.hellorin.boathub.dto.BoatDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,25 +30,19 @@ class BoatMapperTest {
     @Test
     void mapToEntity() {
         // Given
-        BoatDto boatDto = new BoatDto();
-        boatDto.setId(1L);
+        BoatCreationDto boatDto = new BoatCreationDto();
         boatDto.setName("The Black Pearl");
         boatDto.setDescription("A legendary pirate ship");
         boatDto.setBoatType(BoatType.SAILBOAT.name());
-        boatDto.setCreatedDate(testDateTime);
-        boatDto.setUpdatedDate(testDateTime.plusHours(1));
 
         // When
         BoatEntity result = boatMapper.toEntity(boatDto);
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(boatDto.getId());
         assertThat(result.getName()).isEqualTo(boatDto.getName());
         assertThat(result.getDescription()).isEqualTo(boatDto.getDescription());
         assertThat(result.getBoatType().name()).isEqualTo(boatDto.getBoatType());
-        assertThat(result.getCreatedDate()).isEqualTo(boatDto.getCreatedDate());
-        assertThat(result.getUpdatedDate()).isEqualTo(boatDto.getUpdatedDate());
     }
 
     @Test
@@ -77,8 +72,8 @@ class BoatMapperTest {
     @Test
     void mapToEntityWithNullValues() {
         // Given
-        BoatDto boatDto = new BoatDto();
-        boatDto.setId(3L);
+        BoatCreationDto boatDto = new BoatCreationDto();
+
         boatDto.setName("Minimal Boat");
         boatDto.setBoatType(BoatType.MOTORBOAT.name());
         // description, createdDate, updatedDate are null
@@ -88,7 +83,6 @@ class BoatMapperTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(boatDto.getId());
         assertThat(result.getName()).isEqualTo(boatDto.getName());
         assertThat(result.getDescription()).isNull();
         assertThat(result.getBoatType().name()).isEqualTo(boatDto.getBoatType());
@@ -122,7 +116,7 @@ class BoatMapperTest {
     void mapToEntityWithAllBoatTypes() {
         // Given
         for (BoatType boatType : BoatType.values()) {
-            BoatDto boatDto = new BoatDto();
+            BoatCreationDto boatDto = new BoatCreationDto();
             boatDto.setName("Test " + boatType.getDisplayName());
             boatDto.setBoatType(boatType.name());
 
@@ -157,7 +151,7 @@ class BoatMapperTest {
     @Test
     void mapToEntityWithEmptyString() {
         // Given
-        BoatDto boatDto = new BoatDto();
+        BoatCreationDto boatDto = new BoatCreationDto();
         boatDto.setName("");
         boatDto.setDescription("");
         boatDto.setBoatType(BoatType.OTHER.name());

@@ -25,7 +25,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,7 +81,7 @@ class BoatV1ControllerIntegrationTest {
     @WithMockUser
     void getAllBoatsInPage_WithValidParameters_ShouldReturn200() throws Exception {
         // Given
-        List<BoatDto> boats = Arrays.asList(createTestBoat());
+        List<BoatDto> boats = List.of(createTestBoat());
         Page<BoatDto> boatPage = new PageImpl<>(boats);
         when(boatService.getAllBoatsInPage(any(PageRequest.class))).thenReturn(boatPage);
 
@@ -755,4 +754,5 @@ class BoatV1ControllerIntegrationTest {
                 .with(csrf()))
                 .andExpect(status().isForbidden());
     }
+
 }

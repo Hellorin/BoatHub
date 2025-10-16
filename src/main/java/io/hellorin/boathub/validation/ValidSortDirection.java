@@ -15,6 +15,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidSortDirection {
     String message() default "Invalid sortDirection. Allowed values are: asc, desc";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

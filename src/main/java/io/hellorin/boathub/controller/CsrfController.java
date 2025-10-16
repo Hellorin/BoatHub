@@ -26,7 +26,7 @@ public class CsrfController {
      */
     @GetMapping("/csrf-token")
     public CsrfTokenResponse getCsrfToken(HttpServletRequest request) {
-        CsrfToken csrfToken = (CsrfToken) request.getAttribute("_csrf");
+        var csrfToken = (CsrfToken) request.getAttribute("_csrf");
         if (csrfToken != null) {
             return new CsrfTokenResponse(
                 csrfToken.getToken(),

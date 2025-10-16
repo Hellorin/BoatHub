@@ -12,17 +12,10 @@ public class BoatNameUpdateDto {
     @NotBlank(message = "Boat name is required")
     @Size(max = 100, message = "Boat name must not exceed 100 characters")
     private String name;
-    
-    /**
-     * Default constructor.
-     */
+
     public BoatNameUpdateDto() {
     }
-    
-    /**
-     * Constructor with name field.
-     * @param name The boat name
-     */
+
     public BoatNameUpdateDto(String name) {
         this.name = name;
     }

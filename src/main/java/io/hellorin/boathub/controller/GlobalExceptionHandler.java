@@ -53,9 +53,7 @@ public class GlobalExceptionHandler {
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining(", "));
 
-        var errorResponse = new ErrorResponseDto(
-                "'Validation failed':\n " + validationErrors
-        );
+        var errorResponse = new ErrorResponseDto("'Validation failed':\n " + validationErrors);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
@@ -75,9 +73,7 @@ public class GlobalExceptionHandler {
                 .map(ConstraintViolation::getMessage)
                 .collect(Collectors.joining(", "));
 
-        var errorResponse = new ErrorResponseDto(
-                "Validation failed: " + validationErrors
-        );
+        var errorResponse = new ErrorResponseDto("Validation failed: " + validationErrors);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
@@ -92,9 +88,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex) {
         LOGGER.warn("HTTP method not supported: {}", ex.getMessage());
 
-        var errorResponse = new ErrorResponseDto(
-                "HTTP method '" + ex.getMethod() + "' is not supported for this endpoint"
-        );
+        var errorResponse = new ErrorResponseDto("HTTP method '" + ex.getMethod() + "' is not supported for this endpoint");
 
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errorResponse);
     }
@@ -109,9 +103,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException ex) {
         LOGGER.warn("Unsupported media type: {}", ex.getMessage());
 
-        var errorResponse = new ErrorResponseDto(
-                "Content-Type '" + ex.getContentType() + "' is not supported"
-        );
+        var errorResponse = new ErrorResponseDto("Content-Type '" + ex.getContentType() + "' is not supported");
 
         return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(errorResponse);
     }
@@ -126,9 +118,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         LOGGER.warn("HTTP message not readable: {}", ex.getMessage());
 
-        var errorResponse = new ErrorResponseDto(
-                "Invalid request body format"
-        );
+        var errorResponse = new ErrorResponseDto("Invalid request body format");
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
@@ -143,9 +133,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleTypeMismatchException(TypeMismatchException ex) {
         LOGGER.warn("Type mismatch: {}", ex.getMessage());
 
-        var errorResponse = new ErrorResponseDto(
-                "Invalid parameter type for '" + ex.getPropertyName() + "': expected " + ex.getRequiredType().getSimpleName()
-        );
+        var errorResponse = new ErrorResponseDto("Invalid parameter type for '" + ex.getPropertyName() + "': expected " + ex.getRequiredType().getSimpleName());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
@@ -161,9 +149,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleAllExceptions(Exception ex, WebRequest request) {
         LOGGER.error("An error occurred: {}", ex.getMessage(), ex);
         
-        var errorResponse = new ErrorResponseDto(
-            "An error occurred. Please try again later."
-        );
+        var errorResponse = new ErrorResponseDto("An error occurred. Please try again later.");
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }

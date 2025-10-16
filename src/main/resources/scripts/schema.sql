@@ -11,8 +11,7 @@ CREATE TABLE IF NOT EXISTS boats (
 );
 
 -- Check indexes in the future to see how the application evolves to be able to scale
-
-
+CREATE INDEX IF NOT EXISTS idx_boats_name ON boats(name);
 
 -- Create users table for authentication
 CREATE TABLE IF NOT EXISTS users (
