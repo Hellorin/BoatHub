@@ -2,6 +2,8 @@
  * Base API configuration and utilities
  */
 
+import { csrfService } from './csrfService'
+
 const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8080'
 
 export interface ApiConfig {
@@ -41,12 +43,22 @@ export async function apiRequest<T>(
   const finalConfig = { ...defaultApiConfig, ...config }
   const url = `${finalConfig.baseURL}${endpoint}`
   
+  // Get headers with CSRF token if needed
+  const csrfHeaders = await csrfService.getHeadersForRequest(
+    options.method || 'GET',
+    url
+  )
+  
+  const headers: Record<string, string> = {
+    ...finalConfig.headers,
+    ...csrfHeaders,
+    ...(options.headers as Record<string, string>)
+  }
+  
   const requestOptions: RequestInit = {
     ...options,
-    headers: {
-      ...finalConfig.headers,
-      ...options.headers
-    }
+    credentials: 'include', // Include cookies for session-based authentication
+    headers
   }
 
   try {
@@ -55,11 +67,54 @@ export async function apiRequest<T>(
     if (!response.ok) {
       let errorMessage = `HTTP ${response.status}: ${response.statusText}`
       
-      try {
-        const errorData = await response.json()
-        errorMessage = errorData.message || errorMessage
-      } catch {
-        // If response is not JSON, use the default error message
+      // Handle 401 Unauthorized with specific message for login
+      if (response.status === 401) {
+        // Only redirect if not already on login page to avoid infinite loops
+        if (window.location.pathname !== '/' && window.location.pathname !== '/login') {
+          window.location.href = '/'
+        }
+        // Show user-friendly message for 401 errors
+        errorMessage = 'Invalid username or password'
+      } else if (response.status === 403) {
+        // Handle 403 Forbidden - try CSRF token refresh
+        try {
+          const errorData = await response.json()
+          if (errorData.message?.includes('CSRF')) {
+            // Try to refresh CSRF token and retry the request
+            await csrfService.refreshToken()
+            const retryHeaders = await csrfService.getHeadersForRequest(
+              options.method || 'GET',
+              url
+            )
+            
+            const retryOptions: RequestInit = {
+              ...options,
+              credentials: 'include',
+              headers: {
+                ...finalConfig.headers,
+                ...retryHeaders,
+                ...(options.headers as Record<string, string>)
+              }
+            }
+            
+            const retryResponse = await fetch(url, retryOptions)
+            if (retryResponse.ok) {
+              return await retryResponse.json()
+            }
+          }
+        } catch (retryError) {
+          console.error('Failed to retry request after CSRF refresh:', retryError)
+        }
+        
+        errorMessage = 'Access forbidden. Please refresh the page and try again.'
+        console.error('403 Forbidden - Possible CSRF token issue for:', options.method, endpoint)
+      } else {
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorMessage
+        } catch {
+          // If response is not JSON, use the default error message
+        }
       }
       
       throw new ApiError(errorMessage, response.status, response)

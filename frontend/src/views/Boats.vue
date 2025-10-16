@@ -1,10 +1,14 @@
 <template>
   <div class="boats">
     <div class="page-header">
-      <h1>Boat Management</h1>
-      <button class="add-boat-btn" @click="showAddForm = !showAddForm">
-        Add New Boat
-      </button>
+      <div class="header-left">
+        <h1>Boat Management</h1>
+      </div>
+      <div class="header-right">
+        <button class="add-boat-btn" @click="showAddForm = !showAddForm">
+          Add New Boat
+        </button>
+      </div>
     </div>
 
     <!-- Error Message Display -->
@@ -249,7 +253,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useBoatStore } from '../stores/boatStore'
 import type { Boat, CreateBoatRequest, UpdateBoatRequest, Pageable } from '../types'
 
-// Use the boat store
+// Use the stores
 const boatStore = useBoatStore()
 
 // Local component state
@@ -258,7 +262,7 @@ const errorMessage = ref<string | null>(null)
 
 // Pagination state
 const currentPage = ref(1)
-const itemsPerPage = ref(10)
+const itemsPerPage = ref(5)
 
 // Sorting state
 const sortBy = ref('name')
@@ -286,7 +290,6 @@ const newBoat = ref({
 // Computed properties from store
 const boats = computed(() => boatStore.boats)
 const loading = computed(() => boatStore.loading)
-
 
 // Pagination computed properties
 const totalPages = computed(() => boatStore.currentPage?.totalPages || 0)
@@ -416,6 +419,7 @@ const clearError = () => {
   errorMessage.value = null
 }
 
+
 const showError = (message: string) => {
   errorMessage.value = message
   // Auto-clear error after 5 seconds
@@ -531,10 +535,30 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e1e8ed;
 }
 
-.page-header h1 {
+.header-left h1 {
   color: #2c3e50;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.welcome-text {
+  color: #2c3e50;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .add-boat-btn {
@@ -550,6 +574,26 @@ onMounted(() => {
 
 .add-boat-btn:hover {
   background-color: #229954;
+}
+
+.logout-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.logout-btn:hover:not(:disabled) {
+  background-color: #c0392b;
+}
+
+.logout-btn:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
 }
 
 .add-boat-form {

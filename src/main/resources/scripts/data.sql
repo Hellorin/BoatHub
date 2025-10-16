@@ -5,4 +5,7 @@ INSERT INTO boats (name, description, boat_type, created_date, updated_date) VAL
 ('The Black Pearl', 'A legendary pirate ship known for its speed and mystique', 'SAILBOAT', CURRENT_TIMESTAMP - INTERVAL '30' DAY, CURRENT_TIMESTAMP - INTERVAL '5' DAY),
 ('Titanic', 'The famous ocean liner that met its fate in the North Atlantic', 'OTHER', CURRENT_TIMESTAMP - INTERVAL '20' DAY, CURRENT_TIMESTAMP - INTERVAL '10' DAY),
 ('Sea Breeze', 'A luxurious yacht perfect for weekend getaways', 'YACHT', CURRENT_TIMESTAMP - INTERVAL '10' DAY, CURRENT_TIMESTAMP - INTERVAL '1' DAY),
-('Fishing Master', 'A sturdy fishing boat designed for deep sea fishing', 'FISHING_BOAT', CURRENT_TIMESTAMP - INTERVAL '5' DAY, CURRENT_TIMESTAMP - INTERVAL '2' HOUR);
+('Fishing Master', 'A sturdy fishing boat designed for deep sea fishing', 'FISHING_BOAT', CURRENT_TIMESTAMP - INTERVAL '5' DAY, CURRENT_TIMESTAMP - INTERVAL '2' HOUR),
+('Ocean Explorer', 'A modern research vessel equipped with advanced navigation systems', 'SAILBOAT', CURRENT_TIMESTAMP - INTERVAL '15' DAY, CURRENT_TIMESTAMP - INTERVAL '3' DAY),
+('Thunder Wave', 'A high-performance speedboat built for racing and thrill-seeking', 'SPEEDBOAT', CURRENT_TIMESTAMP - INTERVAL '7' DAY, CURRENT_TIMESTAMP - INTERVAL '6' HOUR),
+('Island Hopper', 'A compact and efficient boat perfect for exploring coastal waters', 'FISHING_BOAT', CURRENT_TIMESTAMP - INTERVAL '12' DAY, CURRENT_TIMESTAMP - INTERVAL '1' DAY);
