@@ -596,6 +596,7 @@ class BoatV1ControllerIntegrationTest {
     // CSRF Protection Tests - These tests verify CSRF protection is working
 
     @Test
+    @WithMockUser
     void createBoat_WithoutCsrfToken_ShouldReturn403() throws Exception {
         // Given
         BoatCreationDto creationDto = new BoatCreationDto("New Boat", "A new boat", "SAILBOAT");
@@ -608,6 +609,7 @@ class BoatV1ControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoat_WithoutCsrfToken_ShouldReturn403() throws Exception {
         // Given
         BoatUpdateDto updateDto = new BoatUpdateDto("Updated Boat", "Updated description", "MOTORBOAT");
@@ -620,6 +622,7 @@ class BoatV1ControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoatName_WithoutCsrfToken_ShouldReturn403() throws Exception {
         // Given
         BoatNameUpdateDto nameUpdateDto = new BoatNameUpdateDto("Updated Name");
@@ -632,15 +635,12 @@ class BoatV1ControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser
     void deleteBoat_WithoutCsrfToken_ShouldReturn403() throws Exception {
         // When & Then - Request without CSRF token should be rejected
         mockMvc.perform(delete("/api/v1/boats/1"))
                 .andExpect(status().isFound());
     }
-
-    // Test unsupported HTTP methods
-
-
 
     // Test content type validation
 

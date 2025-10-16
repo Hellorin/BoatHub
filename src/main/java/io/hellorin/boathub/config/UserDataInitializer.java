@@ -32,7 +32,7 @@ public class UserDataInitializer implements CommandLineRunner {
      */
     @Override
     public void run(String... args) throws Exception {
-        createUserIfNotExists("owt", "owt", "Testing account");
+        createUserIfNotExists("owt", "owt");
     }
 
     /**
@@ -40,16 +40,12 @@ public class UserDataInitializer implements CommandLineRunner {
      *
      * @param username the username
      * @param password the plain text password (will be encoded)
-     * @param description description for logging
      */
-    private void createUserIfNotExists(String username, String password, String description) {
+    private void createUserIfNotExists(String username, String password) {
         if (!userRepository.existsByUsername(username)) {
             String encodedPassword = passwordEncoder.encode(password);
             UserEntity user = new UserEntity(username, encodedPassword);
             userRepository.save(user);
-            System.out.println("Created user: " + username + " (" + description + ")");
-        } else {
-            System.out.println("User already exists: " + username);
         }
     }
 }
