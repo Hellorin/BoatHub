@@ -20,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import java.util.Optional;
 
 /**
  * REST controller for boat-related API endpoints.
@@ -131,6 +132,32 @@ public class BoatV1Controller {
                 .body(createdBoat);
     }
 
+    /**
+     * Updates an existing boat by its ID.
+     * @param id The ID of the boat to update
+     * @param boatUpdateDto The boat data to update
+     * @return ResponseEntity containing the updated boat DTO if found, or 404 if not found
+     */
+    @Operation(
+        summary = "Update a boat",
+        description = "Updates an existing boat with the provided information. Only provided fields will be updated."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Boat updated successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid boat data provided"),
+        @ApiResponse(responseCode = "404", description = "Boat not found")
+    })
+    @PutMapping(value = "/{id}", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<BoatDto> updateBoat(
+            @Parameter(description = "Unique identifier of the boat to update", example = "1")
+            @PathVariable("id") Long id,
+            @Parameter(description = "Boat data to update")
+            @Valid @RequestBody BoatUpdateDto boatUpdateDto) {
+        Optional<BoatDto> updatedBoat = boatService.updateBoat(id, boatUpdateDto);
+        
+        return updatedBoat.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
     /**
      * Updates the name of an existing boat by its ID.

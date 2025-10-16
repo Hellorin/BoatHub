@@ -222,6 +222,123 @@ class BoatV1ControllerSliceTest {
                 .andExpect(status().isBadRequest());
     }
 
+    // PUT /api/v1/boats/{id} - Test HTTP status codes
+
+    @Test
+    void updateBoat_WithValidData_ShouldReturn200() throws Exception {
+        // Given
+        BoatUpdateDto updateDto = new BoatUpdateDto("Updated Boat", "Updated description", "MOTORBOAT");
+        BoatDto updatedBoat = createTestBoat();
+        updatedBoat.setName("Updated Boat");
+        updatedBoat.setDescription("Updated description");
+        updatedBoat.setBoatType(BoatType.MOTORBOAT.name());
+        when(boatService.updateBoat(any(Long.class), any(BoatUpdateDto.class))).thenReturn(Optional.of(updatedBoat));
+
+        // When & Then
+        mockMvc.perform(put("/api/v1/boats/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Updated Boat"))
+                .andExpect(jsonPath("$.description").value("Updated description"))
+                .andExpect(jsonPath("$.boatType").value("MOTORBOAT"));
+    }
+
+    @Test
+    void updateBoat_WhenBoatNotFound_ShouldReturn404() throws Exception {
+        // Given
+        BoatUpdateDto updateDto = new BoatUpdateDto("Updated Boat", "Updated description", "MOTORBOAT");
+        when(boatService.updateBoat(999L, updateDto)).thenReturn(Optional.empty());
+
+        // When & Then
+        mockMvc.perform(put("/api/v1/boats/999")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateBoat_WithInvalidJson_ShouldReturn400() throws Exception {
+        // When & Then
+        mockMvc.perform(put("/api/v1/boats/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("invalid json"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateBoat_WithMissingRequiredFields_ShouldReturn400() throws Exception {
+        // Given
+        BoatUpdateDto invalidDto = new BoatUpdateDto("", "", "");
+
+        // When & Then
+        mockMvc.perform(put("/api/v1/boats/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateBoat_WithInvalidBoatType_ShouldReturn400() throws Exception {
+        // Given
+        BoatUpdateDto invalidDto = new BoatUpdateDto("Test Boat", "A test boat", "INVALID_TYPE");
+
+        // When & Then
+        mockMvc.perform(put("/api/v1/boats/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateBoat_WithExcessiveNameLength_ShouldReturn400() throws Exception {
+        // Given
+        String longName = "a".repeat(101); // Exceeds 100 character limit
+        BoatUpdateDto invalidDto = new BoatUpdateDto(longName, "A test boat", "SAILBOAT");
+
+        // When & Then
+        mockMvc.perform(put("/api/v1/boats/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateBoat_WithExcessiveDescriptionLength_ShouldReturn400() throws Exception {
+        // Given
+        String longDescription = "a".repeat(501); // Exceeds 500 character limit
+        BoatUpdateDto invalidDto = new BoatUpdateDto("Test Boat", longDescription, "SAILBOAT");
+
+        // When & Then
+        mockMvc.perform(put("/api/v1/boats/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateBoat_WithInvalidId_ShouldReturn400() throws Exception {
+        // Given
+        BoatUpdateDto updateDto = new BoatUpdateDto("Updated Boat", "Updated description", "MOTORBOAT");
+
+        // When & Then
+        mockMvc.perform(put("/api/v1/boats/invalid")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateBoat_WithWrongContentType_ShouldReturn415() throws Exception {
+        // When & Then
+        mockMvc.perform(put("/api/v1/boats/1")
+                .contentType(MediaType.TEXT_PLAIN)
+                .content("some text"))
+                .andExpect(status().isUnsupportedMediaType());
+    }
+
     // PATCH /api/v1/boats/{id}/name - Test HTTP status codes
 
     @Test
@@ -399,12 +516,6 @@ class BoatV1ControllerSliceTest {
 
     // Test unsupported HTTP methods
 
-    @Test
-    void putRequest_ShouldReturn405() throws Exception {
-        // When & Then
-        mockMvc.perform(put("/api/v1/boats/1"))
-                .andExpect(status().isMethodNotAllowed());
-    }
 
 
     // Test content type validation
