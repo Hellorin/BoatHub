@@ -58,7 +58,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf
                     .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                     .csrfTokenRequestHandler(requestHandler)
-                    .ignoringRequestMatchers("/api/csrf-token") // Allow CSRF token
+                    .ignoringRequestMatchers("/api/csrf-token") // NOSONAR: Method to get a csrf token for front
             )
 
             // Configure session management with security best practices
