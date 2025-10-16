@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Profile("dev") // We don't want to run this in stage or production
-public class DataInitializer implements CommandLineRunner {
+public class UserDataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public DataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserDataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -32,8 +32,7 @@ public class DataInitializer implements CommandLineRunner {
      */
     @Override
     public void run(String... args) throws Exception {
-        createUserIfNotExists("admin", "admin", "Administrator account");
-        createUserIfNotExists("user", "user", "Regular user account");
+        createUserIfNotExists("owt", "owt", "Testing account");
     }
 
     /**

@@ -5,14 +5,8 @@
         <h1>Boat Management</h1>
       </div>
       <div class="header-right">
-        <div class="user-info">
-          <span class="welcome-text">Welcome, {{ username }}!</span>
-        </div>
         <button class="add-boat-btn" @click="showAddForm = !showAddForm">
           Add New Boat
-        </button>
-        <button class="logout-btn" @click="handleLogout" :disabled="loading">
-          {{ loading ? 'Logging out...' : 'Logout' }}
         </button>
       </div>
     </div>
@@ -256,15 +250,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useBoatStore } from '../stores/boatStore'
-import { useAuthStore } from '../stores/authStore'
 import type { Boat, CreateBoatRequest, UpdateBoatRequest, Pageable } from '../types'
 
 // Use the stores
 const boatStore = useBoatStore()
-const authStore = useAuthStore()
-const router = useRouter()
 
 // Local component state
 const showAddForm = ref(false)
@@ -272,7 +262,7 @@ const errorMessage = ref<string | null>(null)
 
 // Pagination state
 const currentPage = ref(1)
-const itemsPerPage = ref(10)
+const itemsPerPage = ref(5)
 
 // Sorting state
 const sortBy = ref('name')
@@ -300,8 +290,6 @@ const newBoat = ref({
 // Computed properties from store
 const boats = computed(() => boatStore.boats)
 const loading = computed(() => boatStore.loading)
-const username = computed(() => authStore.username || 'User')
-
 
 // Pagination computed properties
 const totalPages = computed(() => boatStore.currentPage?.totalPages || 0)
@@ -431,19 +419,6 @@ const clearError = () => {
   errorMessage.value = null
 }
 
-/**
- * Handle user logout
- */
-const handleLogout = async () => {
-  try {
-    await authStore.logout()
-    router.push('/')
-  } catch (error) {
-    console.error('Logout error:', error)
-    // Even if logout fails, redirect to login page
-    router.push('/')
-  }
-}
 
 const showError = (message: string) => {
   errorMessage.value = message

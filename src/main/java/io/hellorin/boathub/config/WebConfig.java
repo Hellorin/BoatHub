@@ -64,20 +64,5 @@ public class WebConfig implements WebMvcConfigurer {
         // Forward all routes to index.html for client-side routing
         registry.addViewController("/").setViewName("forward:/index.html");
         registry.addViewController("/boats").setViewName("forward:/index.html");
-        registry.addViewController("/login").setViewName("forward:/index.html");
-    }
-
-    /**
-     * Configures HTTP message converters to handle large JSON responses efficiently.
-     * This configuration optimizes JSON serialization for large datasets.
-     *
-     * @param converters The list of HTTP message converters to configure
-     */
-    @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        var jacksonConverter = new MappingJackson2HttpMessageConverter();
-        // Set a higher max in-memory size for large JSON responses (default is 256KB)
-        jacksonConverter.setDefaultCharset(java.nio.charset.StandardCharsets.UTF_8);
-        converters.add(jacksonConverter);
     }
 }

@@ -7,14 +7,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 /**
  * Security configuration for the application.
@@ -40,30 +40,48 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for REST API
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .maximumSessions(1)
-                .maxSessionsPreventsLogin(false)
-            )
-            .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/v1/**").authenticated()
+        // Configure CSRF token request handler for SPA compatibility
+        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+        // Disable the requirement for the header "X-Requested-With" to allow AJAX requests
+        requestHandler.setCsrfRequestAttributeName("_csrf");
 
-                .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
-                .requestMatchers("/actuator/**").permitAll()
-                .requestMatchers("/").permitAll()
-                .requestMatchers("/index.html").permitAll()
-                .requestMatchers("/assets/**").permitAll()
-                .anyRequest().authenticated()
+        http
+            .csrf(csrf -> csrf
+                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .csrfTokenRequestHandler(requestHandler)
+                    .ignoringRequestMatchers("/api/csrf-token", "/api/auth/**") // Allow CSRF token and auth endpoints without CSRF
+            )
+
+            // TODO: Session persistence could really help with service restart
+            .sessionManagement(session -> session
+                    .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                    .maximumSessions(1)
+                    .maxSessionsPreventsLogin(false)
+            )
+
+            .authorizeHttpRequests(authz -> authz
+                    // Backend
+                    .requestMatchers("/api/csrf-token").permitAll()
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/v1/**").authenticated()
+
+                    // Frontend
+                    .requestMatchers("/").permitAll()
+                    .requestMatchers("/index.html").permitAll()
+                    .requestMatchers("/assets/**").permitAll()
+
+                    // Utilities
+                    .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
+                    .requestMatchers("/actuator/**").permitAll()
+
+                    .anyRequest().authenticated()
             )
             .logout(logout -> logout
-                .logoutUrl("/api/auth/logout")
-                .logoutSuccessUrl("/")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .permitAll()
+                    .logoutUrl("/api/auth/logout")
+                    .logoutSuccessUrl("/")
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID")
+                    .permitAll()
             )
             .userDetailsService(userDetailsService)
             .securityContext(securityContext -> securityContext

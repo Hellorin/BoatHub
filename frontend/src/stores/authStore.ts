@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { authService } from '@/services/authService'
+import { authService } from '../services/authService'
+import { csrfService } from '../services/csrfService'
 
 export interface User {
   username: string
@@ -47,6 +48,10 @@ export const useAuthStore = defineStore('auth', {
         this.user = user
         this.isAuthenticated = true
         this.loading = false
+        
+        // Refresh CSRF token after successful login to ensure we have a valid token for the new session
+        await csrfService.refreshToken()
+        
         return true
       } catch (error: any) {
         this.error = error.message || 'Login failed'
@@ -73,6 +78,9 @@ export const useAuthStore = defineStore('auth', {
         // Even if logout fails on server, clear local state
         this.user = null
         this.isAuthenticated = false
+      } finally {
+        // Always clear CSRF token on logout to prevent stale token issues
+        csrfService.clearToken()
       }
     },
 
@@ -102,6 +110,17 @@ export const useAuthStore = defineStore('auth', {
      */
     clearError(): void {
       this.error = null
+    },
+
+    /**
+     * Clear all authentication state including CSRF token
+     */
+    clearAuthState(): void {
+      this.user = null
+      this.isAuthenticated = false
+      this.loading = false
+      this.error = null
+      csrfService.clearToken()
     }
   }
 })

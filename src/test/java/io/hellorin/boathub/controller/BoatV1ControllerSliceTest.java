@@ -7,6 +7,7 @@ import io.hellorin.boathub.domain.BoatType;
 import io.hellorin.boathub.dto.*;
 import io.hellorin.boathub.service.BoatService;
 import io.hellorin.boathub.service.UserDetailsServiceImpl;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -64,6 +66,14 @@ class BoatV1ControllerSliceTest {
         boat.setCreatedDate(LocalDateTime.now());
         boat.setUpdatedDate(LocalDateTime.now());
         return boat;
+    }
+
+    /**
+     * Helper method to add CSRF token to state-changing requests.
+     * This simulates how the frontend would include CSRF tokens.
+     */
+    private static org.springframework.test.web.servlet.request.RequestPostProcessor csrf() {
+        return SecurityMockMvcRequestPostProcessors.csrf();
     }
 
     // GET /api/v1/boats - Test HTTP status codes
@@ -168,6 +178,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/boats")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(creationDto)))
                 .andExpect(status().isCreated())
@@ -182,6 +193,7 @@ class BoatV1ControllerSliceTest {
     void createBoat_WithInvalidJson_ShouldReturn400() throws Exception {
         // When & Then
         mockMvc.perform(post("/api/v1/boats")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("invalid json"))
                 .andExpect(status().isBadRequest());
@@ -195,6 +207,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/boats")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest());
@@ -208,6 +221,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/boats")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest());
@@ -222,6 +236,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/boats")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest());
@@ -236,6 +251,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/boats")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest());
@@ -256,6 +272,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(put("/api/v1/boats/1")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
@@ -275,6 +292,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(put("/api/v1/boats/999")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isNotFound());
@@ -285,6 +303,7 @@ class BoatV1ControllerSliceTest {
     void updateBoat_WithInvalidJson_ShouldReturn400() throws Exception {
         // When & Then
         mockMvc.perform(put("/api/v1/boats/1")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("invalid json"))
                 .andExpect(status().isBadRequest());
@@ -298,6 +317,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(put("/api/v1/boats/1")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest());
@@ -311,6 +331,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(put("/api/v1/boats/1")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest());
@@ -325,6 +346,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(put("/api/v1/boats/1")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest());
@@ -339,6 +361,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(put("/api/v1/boats/1")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest());
@@ -352,6 +375,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(put("/api/v1/boats/invalid")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().isBadRequest());
@@ -362,6 +386,7 @@ class BoatV1ControllerSliceTest {
     void updateBoat_WithWrongContentType_ShouldReturn415() throws Exception {
         // When & Then
         mockMvc.perform(put("/api/v1/boats/1")
+                .with(csrf())
                 .contentType(MediaType.TEXT_PLAIN)
                 .content("some text"))
                 .andExpect(status().isUnsupportedMediaType());
@@ -380,6 +405,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(patch("/api/v1/boats/1/name")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(nameUpdateDto)))
                 .andExpect(status().isOk())
@@ -396,6 +422,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(patch("/api/v1/boats/999/name")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(nameUpdateDto)))
                 .andExpect(status().isNotFound());
@@ -409,6 +436,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(patch("/api/v1/boats/1/name")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest());
@@ -423,6 +451,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(patch("/api/v1/boats/1/name")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest());
@@ -441,6 +470,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(patch("/api/v1/boats/1/description")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(descriptionUpdateDto)))
                 .andExpect(status().isOk())
@@ -457,6 +487,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(patch("/api/v1/boats/999/description")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(descriptionUpdateDto)))
                 .andExpect(status().isNotFound());
@@ -471,6 +502,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(patch("/api/v1/boats/1/description")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest());
@@ -489,6 +521,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(patch("/api/v1/boats/1/type")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(typeUpdateDto)))
                 .andExpect(status().isOk())
@@ -505,6 +538,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(patch("/api/v1/boats/999/type")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(typeUpdateDto)))
                 .andExpect(status().isNotFound());
@@ -518,6 +552,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(patch("/api/v1/boats/1/type")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
                 .andExpect(status().isBadRequest());
@@ -532,7 +567,8 @@ class BoatV1ControllerSliceTest {
         when(boatService.deleteBoat(1L)).thenReturn(true);
 
         // When & Then
-        mockMvc.perform(delete("/api/v1/boats/1"))
+        mockMvc.perform(delete("/api/v1/boats/1")
+                .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
@@ -543,7 +579,8 @@ class BoatV1ControllerSliceTest {
         when(boatService.deleteBoat(999L)).thenReturn(false);
 
         // When & Then
-        mockMvc.perform(delete("/api/v1/boats/999"))
+        mockMvc.perform(delete("/api/v1/boats/999")
+                .with(csrf()))
                 .andExpect(status().isNotFound());
     }
 
@@ -551,8 +588,58 @@ class BoatV1ControllerSliceTest {
     @WithMockUser
     void deleteBoat_WithInvalidId_ShouldReturn400() throws Exception {
         // When & Then
-        mockMvc.perform(delete("/api/v1/boats/invalid"))
+        mockMvc.perform(delete("/api/v1/boats/invalid")
+                .with(csrf()))
                 .andExpect(status().isBadRequest());
+    }
+
+    // CSRF Protection Tests - These tests verify CSRF protection is working
+
+    @Test
+    @WithMockUser
+    void createBoat_WithoutCsrfToken_ShouldReturn403() throws Exception {
+        // Given
+        BoatCreationDto creationDto = new BoatCreationDto("New Boat", "A new boat", "SAILBOAT");
+
+        // When & Then - Request without CSRF token should be rejected
+        mockMvc.perform(post("/api/v1/boats")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(creationDto)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser
+    void updateBoat_WithoutCsrfToken_ShouldReturn403() throws Exception {
+        // Given
+        BoatUpdateDto updateDto = new BoatUpdateDto("Updated Boat", "Updated description", "MOTORBOAT");
+
+        // When & Then - Request without CSRF token should be rejected
+        mockMvc.perform(put("/api/v1/boats/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser
+    void updateBoatName_WithoutCsrfToken_ShouldReturn403() throws Exception {
+        // Given
+        BoatNameUpdateDto nameUpdateDto = new BoatNameUpdateDto("Updated Name");
+
+        // When & Then - Request without CSRF token should be rejected
+        mockMvc.perform(patch("/api/v1/boats/1/name")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(nameUpdateDto)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser
+    void deleteBoat_WithoutCsrfToken_ShouldReturn403() throws Exception {
+        // When & Then - Request without CSRF token should be rejected
+        mockMvc.perform(delete("/api/v1/boats/1"))
+                .andExpect(status().isForbidden());
     }
 
     // Test unsupported HTTP methods
@@ -566,6 +653,7 @@ class BoatV1ControllerSliceTest {
     void createBoat_WithWrongContentType_ShouldReturn415() throws Exception {
         // When & Then
         mockMvc.perform(post("/api/v1/boats")
+                .with(csrf())
                 .contentType(MediaType.TEXT_PLAIN)
                 .content("some text"))
                 .andExpect(status().isUnsupportedMediaType());
@@ -576,6 +664,7 @@ class BoatV1ControllerSliceTest {
     void updateBoatName_WithWrongContentType_ShouldReturn415() throws Exception {
         // When & Then
         mockMvc.perform(patch("/api/v1/boats/1/name")
+                .with(csrf())
                 .contentType(MediaType.TEXT_PLAIN)
                 .content("some text"))
                 .andExpect(status().isUnsupportedMediaType());
@@ -631,6 +720,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(patch("/api/v1/boats/1/name")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(nameUpdateDto)))
                 .andExpect(status().isForbidden());
@@ -643,6 +733,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(patch("/api/v1/boats/1/description")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(descriptionUpdateDto)))
                 .andExpect(status().isForbidden());
@@ -655,6 +746,7 @@ class BoatV1ControllerSliceTest {
 
         // When & Then
         mockMvc.perform(patch("/api/v1/boats/1/type")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(typeUpdateDto)))
                 .andExpect(status().isForbidden());
@@ -663,7 +755,8 @@ class BoatV1ControllerSliceTest {
     @Test
     void deleteBoat_WithoutAuthentication_ShouldRedirectToLogin() throws Exception {
         // When & Then
-        mockMvc.perform(delete("/api/v1/boats/1"))
+        mockMvc.perform(delete("/api/v1/boats/1")
+                .with(csrf()))
                 .andExpect(status().isForbidden());
     }
 }
