@@ -7,6 +7,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +16,11 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Security configuration for the application.
@@ -25,9 +31,12 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
+    private final StaticHeadersWriter cspWriter;
 
-    public SecurityConfig(UserDetailsServiceImpl userDetailsService) {
+    public SecurityConfig(UserDetailsServiceImpl userDetailsService, 
+                         @Autowired(required = false) StaticHeadersWriter cspWriter) {
         this.userDetailsService = userDetailsService;
+        this.cspWriter = cspWriter;
     }
 
     /**
@@ -39,7 +48,7 @@ public class SecurityConfig {
      * @throws Exception if configuration fails
      */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, StaticHeadersWriter staticHeadersWriter) throws Exception {
         // Configure CSRF token request handler for SPA compatibility
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
         // Disable the requirement for the header "X-Requested-With" to allow AJAX requests
@@ -49,14 +58,19 @@ public class SecurityConfig {
             .csrf(csrf -> csrf
                     .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                     .csrfTokenRequestHandler(requestHandler)
-                    .ignoringRequestMatchers("/api/csrf-token", "/api/auth/**") // Allow CSRF token and auth endpoints without CSRF
+                    .ignoringRequestMatchers("/api/csrf-token") // Allow CSRF token
             )
 
-            // TODO: Session persistence could really help with service restart
+            // Configure session management with security best practices
             .sessionManagement(session -> session
                     .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                     .maximumSessions(1)
                     .maxSessionsPreventsLogin(false)
+                    .sessionRegistry(sessionRegistry())
+            )
+            .sessionManagement(session -> session
+                    .sessionFixation().migrateSession()  // Regenerate session ID after login
+                    .invalidSessionUrl("/")  // Redirect to home on invalid session
             )
 
             .authorizeHttpRequests(authz -> authz
@@ -82,6 +96,20 @@ public class SecurityConfig {
                     .invalidateHttpSession(true)
                     .deleteCookies("JSESSIONID")
                     .permitAll()
+            )
+            
+            // Add comprehensive security headers
+            .headers(headers -> headers
+                    .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)  // Prevent clickjacking attacks
+                    .contentTypeOptions(HeadersConfigurer.ContentTypeOptionsConfig::disable)  // Prevent MIME sniffing attacks
+                    .httpStrictTransportSecurity(hstsConfig -> hstsConfig
+                            .maxAgeInSeconds(31536000)  // 1 year
+                            .preload(true)
+                    )
+                    .addHeaderWriter(new StaticHeadersWriter("X-XSS-Protection", "1; mode=block"))
+                    .addHeaderWriter(new StaticHeadersWriter("Referrer-Policy", "strict-origin-when-cross-origin"))
+                    .addHeaderWriter(new StaticHeadersWriter("Permissions-Policy", "geolocation=(), microphone=(), camera=()"))
+                    .addHeaderWriter(cspWriter)
             )
             .userDetailsService(userDetailsService)
             .securityContext(securityContext -> securityContext
@@ -123,5 +151,27 @@ public class SecurityConfig {
     @Bean
     public SecurityContextRepository securityContextRepository() {
         return new HttpSessionSecurityContextRepository();
+    }
+
+    /**
+     * Configures the session registry for tracking active sessions.
+     * Required for concurrent session management and session monitoring.
+     *
+     * @return the configured SessionRegistry
+     */
+    @Bean
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
+
+    /**
+     * Configures the HTTP session event publisher for session lifecycle events.
+     * Required for proper session registry functionality.
+     *
+     * @return the configured HttpSessionEventPublisher
+     */
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
     }
 }

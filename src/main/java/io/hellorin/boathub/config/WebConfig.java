@@ -1,14 +1,10 @@
 package io.hellorin.boathub.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.util.List;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -29,7 +25,15 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://localhost:5173"            // Vite dev server
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
+                .allowedHeaders(
+                        "Content-Type", 
+                        "Authorization", 
+                        "X-CSRF-TOKEN", 
+                        "X-Requested-With",
+                        "Accept",
+                        "Origin"
+                )
+                .exposedHeaders("X-CSRF-TOKEN")  // Expose CSRF token to frontend
                 .allowCredentials(true)
                 .maxAge(3600); // Cache preflight response for 1 hour
     }
