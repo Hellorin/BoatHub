@@ -16,9 +16,9 @@ export interface CreateBoatRequest {
 }
 
 export interface UpdateBoatRequest {
-  name?: string
+  name: string
   description?: string
-  boatType?: BoatType
+  boatType: BoatType
 }
 
 // Pagination types

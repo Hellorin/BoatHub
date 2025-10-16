@@ -67,7 +67,8 @@ export class BoatService {
   }
 
   /**
-   * Updates an existing boat
+   * Updates an existing boat with complete boat data.
+   * Requires all fields (name, description, boatType) to be provided.
    */
   async updateBoat(id: number, boatData: UpdateBoatRequest): Promise<Boat> {
     try {
@@ -95,20 +96,6 @@ export class BoatService {
     }
   }
 
-  /**
-   * Updates only the boat name
-   */
-  async updateBoatName(id: number, name: string): Promise<Boat> {
-    try {
-      return await apiRequest<Boat>(`${this.baseEndpoint}/${id}/name`, {
-        method: 'PUT',
-        body: JSON.stringify({ name })
-      })
-    } catch (error) {
-      console.error(`Error updating boat name ${id}:`, error)
-      throw error
-    }
-  }
 }
 
 // Export a singleton instance

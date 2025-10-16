@@ -7,6 +7,15 @@
       </button>
     </div>
 
+    <!-- Error Message Display -->
+    <div v-if="errorMessage" class="error-message">
+      <div class="error-content">
+        <span class="error-icon">⚠️</span>
+        <span class="error-text">{{ errorMessage }}</span>
+        <button @click="clearError" class="error-close">&times;</button>
+      </div>
+    </div>
+
     <!-- Add Boat Form -->
     <div v-if="showAddForm" class="add-boat-form">
       <h3>Add New Boat</h3>
@@ -168,6 +177,15 @@
 
           <!-- Edit Mode -->
           <div v-else-if="modalMode === 'edit'" class="edit-form">
+            <!-- Edit Error Message -->
+            <div v-if="editError" class="edit-error-message">
+              <div class="edit-error-content">
+                <span class="edit-error-icon">⚠️</span>
+                <span class="edit-error-text">{{ editError }}</span>
+                <button @click="clearEditError" class="edit-error-close">&times;</button>
+              </div>
+            </div>
+            
             <div class="form-group">
               <label for="editName">Name:</label>
               <input 
@@ -236,6 +254,7 @@ const boatStore = useBoatStore()
 
 // Local component state
 const showAddForm = ref(false)
+const errorMessage = ref<string | null>(null)
 
 // Pagination state
 const currentPage = ref(1)
@@ -256,6 +275,7 @@ const editForm = ref({
   description: '',
   boatType: ''
 })
+const editError = ref<string | null>(null)
 
 const newBoat = ref({
   name: '',
@@ -357,6 +377,9 @@ const openBoatModal = (boat: Boat, mode: 'view' | 'edit' | 'delete' = 'view') =>
   modalMode.value = mode
   showBoatModal.value = true
   
+  // Clear any existing edit error
+  clearEditError()
+  
   if (mode === 'edit') {
     editForm.value = {
       name: boat.name,
@@ -388,6 +411,35 @@ const formatDate = (dateString?: string) => {
   })
 }
 
+// Error handling
+const clearError = () => {
+  errorMessage.value = null
+}
+
+const showError = (message: string) => {
+  errorMessage.value = message
+  // Auto-clear error after 5 seconds
+  setTimeout(() => {
+    if (errorMessage.value === message) {
+      clearError()
+    }
+  }, 5000)
+}
+
+const clearEditError = () => {
+  editError.value = null
+}
+
+const showEditError = (message: string) => {
+  editError.value = message
+  // Auto-clear error after 5 seconds
+  setTimeout(() => {
+    if (editError.value === message) {
+      clearEditError()
+    }
+  }, 5000)
+}
+
 
 const addBoat = async () => {
   const boatData: CreateBoatRequest = {
@@ -404,6 +456,8 @@ const addBoat = async () => {
     await loadBoats()
   } catch (error) {
     console.error('Error adding boat:', error)
+    const errorMsg = error instanceof Error ? error.message : 'Failed to add boat. Please check your input and try again.'
+    showError(errorMsg)
   }
 }
 
@@ -413,7 +467,7 @@ const saveEdit = async () => {
   
   // Validate that name is not empty
   if (!editForm.value.name.trim()) {
-    alert('Boat name cannot be empty')
+    showEditError('Boat name cannot be empty')
     return
   }
   
@@ -428,6 +482,8 @@ const saveEdit = async () => {
     closeBoatModal()
   } catch (error) {
     console.error('Error updating boat:', error)
+    const errorMsg = error instanceof Error ? error.message : 'Failed to update boat. Please check your input and try again.'
+    showEditError(errorMsg)
   }
 }
 
@@ -444,6 +500,8 @@ const confirmDelete = async () => {
     }
   } catch (error) {
     console.error('Error deleting boat:', error)
+    const errorMsg = error instanceof Error ? error.message : 'Failed to delete boat. Please try again.'
+    showError(errorMsg)
   }
 }
 
@@ -1051,6 +1109,52 @@ onMounted(() => {
   min-height: 80px;
 }
 
+/* Edit Error Message Styles */
+.edit-error-message {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  color: #721c24;
+}
+
+.edit-error-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.edit-error-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.edit-error-text {
+  flex: 1;
+  font-weight: 500;
+}
+
+.edit-error-close {
+  background: none;
+  border: none;
+  color: #721c24;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.edit-error-close:hover {
+  background-color: rgba(114, 28, 36, 0.1);
+}
+
 /* Delete Confirmation Styles */
 .delete-confirmation {
   text-align: center;
@@ -1106,6 +1210,52 @@ onMounted(() => {
 
 .close-btn-secondary:hover {
   background-color: #5a6268;
+}
+
+/* Error Message Styles */
+.error-message {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  color: #721c24;
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.error-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.error-text {
+  flex: 1;
+  font-weight: 500;
+}
+
+.error-close {
+  background: none;
+  border: none;
+  color: #721c24;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.error-close:hover {
+  background-color: rgba(114, 28, 36, 0.1);
 }
 </style>
 

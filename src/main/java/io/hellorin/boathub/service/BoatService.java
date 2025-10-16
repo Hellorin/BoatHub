@@ -6,6 +6,7 @@ import io.hellorin.boathub.domain.BoatEntity;
 import io.hellorin.boathub.domain.BoatType;
 import io.hellorin.boathub.dto.BoatCreationDto;
 import io.hellorin.boathub.dto.BoatDto;
+import io.hellorin.boathub.dto.BoatUpdateDto;
 import io.hellorin.boathub.dto.BoatNameUpdateDto;
 import io.hellorin.boathub.dto.BoatDescriptionUpdateDto;
 import io.hellorin.boathub.dto.BoatTypeUpdateDto;
@@ -63,6 +64,26 @@ public class BoatService {
         return boatMapper.toDto(savedEntity);
     }
 
+    /**
+     * Updates an existing boat by its ID with the provided data.
+     * Only updates fields that are provided (not null) in the update DTO.
+     * @param id The ID of the boat to update
+     * @param boatUpdateDto The boat data to update
+     * @return Optional containing the updated boat DTO if found, empty otherwise
+     */
+    public Optional<BoatDto> updateBoat(Long id, BoatUpdateDto boatUpdateDto) {
+        return boatRepository.findById(id)
+                .map(existingBoat -> {
+                    BoatType boatType = BoatType.valueOf(boatUpdateDto.getBoatType().toUpperCase());
+                    
+                    existingBoat.setName(boatUpdateDto.getName());
+                    existingBoat.setDescription(boatUpdateDto.getDescription());
+                    existingBoat.setBoatType(boatType);
+
+                    BoatEntity savedEntity = boatRepository.save(existingBoat);
+                    return boatMapper.toDto(savedEntity);
+                });
+    }
 
     /**
      * Updates the name of an existing boat by its ID.
