@@ -56,7 +56,7 @@ public class SecurityConfig {
 
         http
             .csrf(csrf -> csrf
-                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                    .csrfTokenRepository(new CookieCsrfTokenRepository())
                     .csrfTokenRequestHandler(requestHandler)
                     .ignoringRequestMatchers("/api/csrf-token") // NOSONAR: Method to get a csrf token for front
             )
