@@ -1,10 +1,20 @@
 <template>
   <div class="boats">
     <div class="page-header">
-      <h1>Boat Management</h1>
-      <button class="add-boat-btn" @click="showAddForm = !showAddForm">
-        Add New Boat
-      </button>
+      <div class="header-left">
+        <h1>Boat Management</h1>
+      </div>
+      <div class="header-right">
+        <div class="user-info">
+          <span class="welcome-text">Welcome, {{ username }}!</span>
+        </div>
+        <button class="add-boat-btn" @click="showAddForm = !showAddForm">
+          Add New Boat
+        </button>
+        <button class="logout-btn" @click="handleLogout" :disabled="loading">
+          {{ loading ? 'Logging out...' : 'Logout' }}
+        </button>
+      </div>
     </div>
 
     <!-- Error Message Display -->
@@ -246,11 +256,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useBoatStore } from '../stores/boatStore'
+import { useAuthStore } from '../stores/authStore'
 import type { Boat, CreateBoatRequest, UpdateBoatRequest, Pageable } from '../types'
 
-// Use the boat store
+// Use the stores
 const boatStore = useBoatStore()
+const authStore = useAuthStore()
+const router = useRouter()
 
 // Local component state
 const showAddForm = ref(false)
@@ -286,6 +300,7 @@ const newBoat = ref({
 // Computed properties from store
 const boats = computed(() => boatStore.boats)
 const loading = computed(() => boatStore.loading)
+const username = computed(() => authStore.username || 'User')
 
 
 // Pagination computed properties
@@ -416,6 +431,20 @@ const clearError = () => {
   errorMessage.value = null
 }
 
+/**
+ * Handle user logout
+ */
+const handleLogout = async () => {
+  try {
+    await authStore.logout()
+    router.push('/')
+  } catch (error) {
+    console.error('Logout error:', error)
+    // Even if logout fails, redirect to login page
+    router.push('/')
+  }
+}
+
 const showError = (message: string) => {
   errorMessage.value = message
   // Auto-clear error after 5 seconds
@@ -531,10 +560,30 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e1e8ed;
 }
 
-.page-header h1 {
+.header-left h1 {
   color: #2c3e50;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.welcome-text {
+  color: #2c3e50;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .add-boat-btn {
@@ -550,6 +599,26 @@ onMounted(() => {
 
 .add-boat-btn:hover {
   background-color: #229954;
+}
+
+.logout-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s;
+}
+
+.logout-btn:hover:not(:disabled) {
+  background-color: #c0392b;
+}
+
+.logout-btn:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
 }
 
 .add-boat-form {

@@ -24,7 +24,9 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
                 .allowedOriginPatterns(
-                        "http://localhost:8080"            // Local development
+                        "http://localhost:8080",           // Local development (backend)
+                        "http://localhost:3000",           // Local development (frontend)
+                        "http://localhost:5173"            // Vite dev server
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
@@ -62,6 +64,7 @@ public class WebConfig implements WebMvcConfigurer {
         // Forward all routes to index.html for client-side routing
         registry.addViewController("/").setViewName("forward:/index.html");
         registry.addViewController("/boats").setViewName("forward:/index.html");
+        registry.addViewController("/login").setViewName("forward:/index.html");
     }
 
     /**

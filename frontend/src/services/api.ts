@@ -43,6 +43,7 @@ export async function apiRequest<T>(
   
   const requestOptions: RequestInit = {
     ...options,
+    credentials: 'include', // Include cookies for session-based authentication
     headers: {
       ...finalConfig.headers,
       ...options.headers
@@ -60,6 +61,14 @@ export async function apiRequest<T>(
         errorMessage = errorData.message || errorMessage
       } catch {
         // If response is not JSON, use the default error message
+      }
+      
+      // Handle 401 Unauthorized - redirect to login
+      if (response.status === 401) {
+        // Only redirect if not already on login page to avoid infinite loops
+        if (window.location.pathname !== '/' && window.location.pathname !== '/login') {
+          window.location.href = '/'
+        }
       }
       
       throw new ApiError(errorMessage, response.status, response)

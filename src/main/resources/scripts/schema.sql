@@ -10,8 +10,17 @@ CREATE TABLE IF NOT EXISTS boats (
     updated_date TIMESTAMP
 );
 
--- Create index on boat_type for better query performance
-CREATE INDEX IF NOT EXISTS idx_boats_boat_type ON boats(boat_type);
+-- Check indexes in the future to see how the application evolves to be able to scale
 
--- Create index on created_date for better query performance
-CREATE INDEX IF NOT EXISTS idx_boats_created_date ON boats(created_date);
+
+
+-- Create users table for authentication
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+-- Create index on username for better query performance
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);

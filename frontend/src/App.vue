@@ -17,7 +17,17 @@
 </template>
 
 <script setup lang="ts">
-// Main app component
+import { onMounted } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
+
+const authStore = useAuthStore()
+
+/**
+ * Check authentication status on app mount
+ */
+onMounted(async () => {
+  await authStore.checkAuth()
+})
 </script>
 
 <style scoped>

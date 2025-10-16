@@ -2,9 +2,11 @@ package io.hellorin.boathub.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.hellorin.boathub.config.JpaConfiguration;
+import io.hellorin.boathub.config.SecurityConfig;
 import io.hellorin.boathub.domain.BoatType;
 import io.hellorin.boathub.dto.*;
 import io.hellorin.boathub.service.BoatService;
+import io.hellorin.boathub.service.UserDetailsServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -34,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Tests the controller layer in isolation with mocked service dependencies.
  */
 @WebMvcTest(
-    value = BoatV1Controller.class,
+    value = {BoatV1Controller.class, SecurityConfig.class},
     excludeAutoConfiguration = {
             JpaConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class , DataSourceAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class, HibernateJpaAutoConfiguration.class
     })
@@ -45,6 +48,9 @@ class BoatV1ControllerSliceTest {
 
     @MockitoBean
     private BoatService boatService;
+
+    @MockitoBean
+    private UserDetailsServiceImpl userDetailsService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -63,6 +69,7 @@ class BoatV1ControllerSliceTest {
     // GET /api/v1/boats - Test HTTP status codes
 
     @Test
+    @WithMockUser
     void getAllBoatsInPage_WithValidParameters_ShouldReturn200() throws Exception {
         // Given
         List<BoatDto> boats = Arrays.asList(createTestBoat());
@@ -83,6 +90,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void getAllBoatsInPage_WithInvalidPage_ShouldReturn400() throws Exception {
         // When & Then
         mockMvc.perform(get("/api/v1/boats")
@@ -92,6 +100,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void getAllBoatsInPage_WithInvalidSize_ShouldReturn400() throws Exception {
         // When & Then
         mockMvc.perform(get("/api/v1/boats")
@@ -101,6 +110,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void getAllBoatsInPage_WithExcessiveSize_ShouldReturn400() throws Exception {
         // When & Then
         mockMvc.perform(get("/api/v1/boats")
@@ -112,6 +122,7 @@ class BoatV1ControllerSliceTest {
     // GET /api/v1/boats/{id} - Test HTTP status codes
 
     @Test
+    @WithMockUser
     void getBoatById_WhenBoatExists_ShouldReturn200() throws Exception {
         // Given
         BoatDto boat = createTestBoat();
@@ -126,6 +137,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void getBoatById_WhenBoatNotFound_ShouldReturn404() throws Exception {
         // Given
         when(boatService.getBoatById(999L)).thenReturn(Optional.empty());
@@ -136,6 +148,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void getBoatById_WithInvalidId_ShouldReturn400() throws Exception {
         // When & Then
         mockMvc.perform(get("/api/v1/boats/invalid"))
@@ -145,6 +158,7 @@ class BoatV1ControllerSliceTest {
     // POST /api/v1/boats - Test HTTP status codes
 
     @Test
+    @WithMockUser
     void createBoat_WithValidData_ShouldReturn201() throws Exception {
         // Given
         BoatCreationDto creationDto = new BoatCreationDto("New Boat", "A new boat", "SAILBOAT");
@@ -164,6 +178,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void createBoat_WithInvalidJson_ShouldReturn400() throws Exception {
         // When & Then
         mockMvc.perform(post("/api/v1/boats")
@@ -173,6 +188,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void createBoat_WithMissingRequiredFields_ShouldReturn400() throws Exception {
         // Given
         BoatCreationDto invalidDto = new BoatCreationDto("", "", "");
@@ -185,6 +201,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void createBoat_WithInvalidBoatType_ShouldReturn400() throws Exception {
         // Given
         BoatCreationDto invalidDto = new BoatCreationDto("Test Boat", "A test boat", "INVALID_TYPE");
@@ -197,6 +214,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void createBoat_WithExcessiveNameLength_ShouldReturn400() throws Exception {
         // Given
         String longName = "a".repeat(101); // Exceeds 100 character limit
@@ -210,6 +228,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void createBoat_WithExcessiveDescriptionLength_ShouldReturn400() throws Exception {
         // Given
         String longDescription = "a".repeat(501); // Exceeds 500 character limit
@@ -225,6 +244,7 @@ class BoatV1ControllerSliceTest {
     // PUT /api/v1/boats/{id} - Test HTTP status codes
 
     @Test
+    @WithMockUser
     void updateBoat_WithValidData_ShouldReturn200() throws Exception {
         // Given
         BoatUpdateDto updateDto = new BoatUpdateDto("Updated Boat", "Updated description", "MOTORBOAT");
@@ -247,6 +267,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoat_WhenBoatNotFound_ShouldReturn404() throws Exception {
         // Given
         BoatUpdateDto updateDto = new BoatUpdateDto("Updated Boat", "Updated description", "MOTORBOAT");
@@ -260,6 +281,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoat_WithInvalidJson_ShouldReturn400() throws Exception {
         // When & Then
         mockMvc.perform(put("/api/v1/boats/1")
@@ -269,6 +291,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoat_WithMissingRequiredFields_ShouldReturn400() throws Exception {
         // Given
         BoatUpdateDto invalidDto = new BoatUpdateDto("", "", "");
@@ -281,6 +304,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoat_WithInvalidBoatType_ShouldReturn400() throws Exception {
         // Given
         BoatUpdateDto invalidDto = new BoatUpdateDto("Test Boat", "A test boat", "INVALID_TYPE");
@@ -293,6 +317,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoat_WithExcessiveNameLength_ShouldReturn400() throws Exception {
         // Given
         String longName = "a".repeat(101); // Exceeds 100 character limit
@@ -306,6 +331,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoat_WithExcessiveDescriptionLength_ShouldReturn400() throws Exception {
         // Given
         String longDescription = "a".repeat(501); // Exceeds 500 character limit
@@ -319,6 +345,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoat_WithInvalidId_ShouldReturn400() throws Exception {
         // Given
         BoatUpdateDto updateDto = new BoatUpdateDto("Updated Boat", "Updated description", "MOTORBOAT");
@@ -331,6 +358,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoat_WithWrongContentType_ShouldReturn415() throws Exception {
         // When & Then
         mockMvc.perform(put("/api/v1/boats/1")
@@ -342,6 +370,7 @@ class BoatV1ControllerSliceTest {
     // PATCH /api/v1/boats/{id}/name - Test HTTP status codes
 
     @Test
+    @WithMockUser
     void updateBoatName_WithValidData_ShouldReturn200() throws Exception {
         // Given
         BoatNameUpdateDto nameUpdateDto = new BoatNameUpdateDto("Updated Name");
@@ -359,6 +388,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoatName_WhenBoatNotFound_ShouldReturn404() throws Exception {
         // Given
         BoatNameUpdateDto nameUpdateDto = new BoatNameUpdateDto("Updated Name");
@@ -372,6 +402,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoatName_WithEmptyName_ShouldReturn400() throws Exception {
         // Given
         BoatNameUpdateDto invalidDto = new BoatNameUpdateDto("");
@@ -384,6 +415,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoatName_WithExcessiveNameLength_ShouldReturn400() throws Exception {
         // Given
         String longName = "a".repeat(101); // Exceeds 100 character limit
@@ -399,6 +431,7 @@ class BoatV1ControllerSliceTest {
     // PATCH /api/v1/boats/{id}/description - Test HTTP status codes
 
     @Test
+    @WithMockUser
     void updateBoatDescription_WithValidData_ShouldReturn200() throws Exception {
         // Given
         BoatDescriptionUpdateDto descriptionUpdateDto = new BoatDescriptionUpdateDto("Updated description");
@@ -416,6 +449,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoatDescription_WhenBoatNotFound_ShouldReturn404() throws Exception {
         // Given
         BoatDescriptionUpdateDto descriptionUpdateDto = new BoatDescriptionUpdateDto("Updated description");
@@ -429,6 +463,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoatDescription_WithExcessiveLength_ShouldReturn400() throws Exception {
         // Given
         String longDescription = "a".repeat(501); // Exceeds 500 character limit
@@ -444,6 +479,7 @@ class BoatV1ControllerSliceTest {
     // PATCH /api/v1/boats/{id}/type - Test HTTP status codes
 
     @Test
+    @WithMockUser
     void updateBoatType_WithValidData_ShouldReturn200() throws Exception {
         // Given
         BoatTypeUpdateDto typeUpdateDto = new BoatTypeUpdateDto("MOTORBOAT");
@@ -461,6 +497,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoatType_WhenBoatNotFound_ShouldReturn404() throws Exception {
         // Given
         BoatTypeUpdateDto typeUpdateDto = new BoatTypeUpdateDto("MOTORBOAT");
@@ -474,6 +511,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoatType_WithInvalidBoatType_ShouldReturn400() throws Exception {
         // Given
         BoatTypeUpdateDto invalidDto = new BoatTypeUpdateDto("INVALID_TYPE");
@@ -488,6 +526,7 @@ class BoatV1ControllerSliceTest {
     // DELETE /api/v1/boats/{id} - Test HTTP status codes
 
     @Test
+    @WithMockUser
     void deleteBoat_WhenBoatExists_ShouldReturn204() throws Exception {
         // Given
         when(boatService.deleteBoat(1L)).thenReturn(true);
@@ -498,6 +537,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void deleteBoat_WhenBoatNotFound_ShouldReturn404() throws Exception {
         // Given
         when(boatService.deleteBoat(999L)).thenReturn(false);
@@ -508,6 +548,7 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void deleteBoat_WithInvalidId_ShouldReturn400() throws Exception {
         // When & Then
         mockMvc.perform(delete("/api/v1/boats/invalid"))
@@ -521,6 +562,7 @@ class BoatV1ControllerSliceTest {
     // Test content type validation
 
     @Test
+    @WithMockUser
     void createBoat_WithWrongContentType_ShouldReturn415() throws Exception {
         // When & Then
         mockMvc.perform(post("/api/v1/boats")
@@ -530,11 +572,98 @@ class BoatV1ControllerSliceTest {
     }
 
     @Test
+    @WithMockUser
     void updateBoatName_WithWrongContentType_ShouldReturn415() throws Exception {
         // When & Then
         mockMvc.perform(patch("/api/v1/boats/1/name")
                 .contentType(MediaType.TEXT_PLAIN)
                 .content("some text"))
                 .andExpect(status().isUnsupportedMediaType());
+    }
+
+    // Authentication Protection Tests - These tests run WITHOUT @WithMockUser to verify authentication is required
+    // Note: With form-based authentication, unauthenticated requests return 302 (redirect to login) instead of 401
+
+    @Test
+    void getAllBoatsInPage_WithoutAuthentication_ShouldRedirectToLogin() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/api/v1/boats")
+                .param("page", "0")
+                .param("size", "10"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getBoatById_WithoutAuthentication_ShouldRedirectToLogin() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/api/v1/boats/1"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void createBoat_WithoutAuthentication_ShouldRedirectToLogin() throws Exception {
+        // Given
+        BoatCreationDto creationDto = new BoatCreationDto("New Boat", "A new boat", "SAILBOAT");
+
+        // When & Then
+        mockMvc.perform(post("/api/v1/boats")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(creationDto)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateBoat_WithoutAuthentication_ShouldRedirectToLogin() throws Exception {
+        // Given
+        BoatUpdateDto updateDto = new BoatUpdateDto("Updated Boat", "Updated description", "MOTORBOAT");
+
+        // When & Then
+        mockMvc.perform(put("/api/v1/boats/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateBoatName_WithoutAuthentication_ShouldRedirectToLogin() throws Exception {
+        // Given
+        BoatNameUpdateDto nameUpdateDto = new BoatNameUpdateDto("Updated Name");
+
+        // When & Then
+        mockMvc.perform(patch("/api/v1/boats/1/name")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(nameUpdateDto)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateBoatDescription_WithoutAuthentication_ShouldRedirectToLogin() throws Exception {
+        // Given
+        BoatDescriptionUpdateDto descriptionUpdateDto = new BoatDescriptionUpdateDto("Updated description");
+
+        // When & Then
+        mockMvc.perform(patch("/api/v1/boats/1/description")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(descriptionUpdateDto)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateBoatType_WithoutAuthentication_ShouldRedirectToLogin() throws Exception {
+        // Given
+        BoatTypeUpdateDto typeUpdateDto = new BoatTypeUpdateDto("MOTORBOAT");
+
+        // When & Then
+        mockMvc.perform(patch("/api/v1/boats/1/type")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(typeUpdateDto)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deleteBoat_WithoutAuthentication_ShouldRedirectToLogin() throws Exception {
+        // When & Then
+        mockMvc.perform(delete("/api/v1/boats/1"))
+                .andExpect(status().isForbidden());
     }
 }
